@@ -8,20 +8,20 @@ export const CATALOG = [
 export const SUB_LABELS = {A:'Aerobic',N:'Anaerobic',C:'Carbonic',I:'Immersion',H:'Cherry',R:'Raised',P:'Patio',M:'Mechanical',S:'Shade'};
 
 export const DESCRIPTIONS = {
-  W:'Washing: removal of mucilage with water to control fermentation and clean parchment.',
-  P:'Depulping: removal of the outer skin/pulp from the cherry using mechanical depulpers.',
-  F:'Fermentation: controlled microbial activity that transforms mucilage and impacts flavor.',
-  D:'Drying: reduction of moisture to safe storage levels on patios, raised beds, shade or machines.',
-  R:'Rest in parchment: conditioning period allowing moisture equilibration before hulling.',
-  SA:'Aerobic fermentation: oxygen available during the process.',
-  SN:'Anaerobic fermentation: oxygen-limited or tank-sealed environment.',
-  SC:'Carbonic maceration: whole-cherry in CO₂-rich environment (wine-inspired).',
-  SI:'Immersion: cherries or parchment submerged in water during fermentation.',
-  SH:'Cherry/on-fruit: fermentation occurs with whole cherries.',
-  SR:'Raised beds: suspended mesh beds improving airflow and uniformity.',
-  SP:'Patio: open air patios, typically concrete or tiled floors.',
-  SM:'Mechanical: assisted/mechanical dryers to accelerate moisture removal.',
-  SS:'Shade: drying under shade to slow rate and protect from direct sun.'
+  W:'Removal of mucilage with water to control fermentation and clean parchment.',
+  P:'Removal of the outer skin/pulp from the cherry using mechanical depulpers.',
+  F:'Controlled microbial activity that transforms mucilage and impacts flavor.',
+  D:'Reduction of moisture to safe storage levels on patios, raised beds, shade or machines.',
+  R:'Conditioning period allowing moisture equilibration before hulling.',
+  SA:'Fermentation made with xygen available during the process.',
+  SN:'Fermentation made without oxygen, often by sealing the beans in tanks.',
+  SC:'Whole-cherry fermentation in CO₂-rich environment (wine-inspired).',
+  SI:'Cherries or parchment are submerged in water during fermentation.',
+  SH:'Fermentation occurs with whole cherries.',
+  SR:'Suspended mesh beds improving airflow and uniformity. Also known as African beds',
+  SP:'Beans were dried on open air patios, typically concrete or tiled floors.',
+  SM:'Beans were dried using assisted/mechanical dryers to accelerate moisture removal.',
+  SS:'Beans were dried under shade to slow rate and protect from direct sun.'
 };
 
 export const $ = (s, root=document) => root.querySelector(s);
