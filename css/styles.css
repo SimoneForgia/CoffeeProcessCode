@@ -68,7 +68,7 @@ details summary::-webkit-details-marker{display:none}
 .step{position:relative}
 .step .close{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.18);display:grid;place-items:center;cursor:pointer}
 .step .close:hover{background:var(--btnHover)}
-.step .handle{position:absolute;left:8px;top:8px;width:26px;height:26px;border:1px dashed var(--line);border-radius:8px;display:grid;place-items:center;cursor:grab;user-select:none}
+.step .handle{position:relative;left:2px;top:8px;width:26px;height:26px;border:1px dashed var(--line);border-radius:8px;display:contents;place-items:center;cursor:grab;user-select:none}
 .step .handle:active{cursor:grabbing}
 .step .num{font-weight:700;margin-left:44px} /* spazio per la handle */
 
