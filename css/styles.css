@@ -17,7 +17,7 @@ p.lead{margin:0;color:var(--fg);opacity:.9;font-size:14px}
 
 button,select,input,a.btn{
   padding:12px;border-radius:12px;border:1px solid var(--line);
-  background:rgba(0,0,0,.18);color:var(--fg);font-size:15px;
+  background:rgba(0,0,0,.18);color:var(--fg);font-size:15px;height:46px
 }
 button{background:var(--btn);border:none;font-weight:700;cursor:pointer}
 button:hover{background:var(--btnHover)}
@@ -63,3 +63,24 @@ details summary::-webkit-details-marker{display:none}
 .home-cta a{display:block;text-align:center;text-decoration:none;background:var(--btn);
   border:none;color:var(--fg);font-weight:800;padding:18px;border-radius:14px}
 .home-cta a:hover{background:var(--btnHover)}
+
+/* Step controls */
+.step{position:relative}
+.step .close{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.18);display:grid;place-items:center;cursor:pointer}
+.step .close:hover{background:var(--btnHover)}
+.step .handle{position:absolute;left:8px;top:8px;width:26px;height:26px;border:1px dashed var(--line);border-radius:8px;display:grid;place-items:center;cursor:grab;user-select:none}
+.step .handle:active{cursor:grabbing}
+.step .num{font-weight:700;margin-left:44px} /* spazio per la handle */
+
+/* CPC row con icona copy integrata */
+.cpc-row{display:grid;grid-template-columns:20% 1fr;gap:12px;align-items:center}
+#cpcWrap{position:relative}
+#cpc{line-height:1.2;padding:10px 44px 10px 12px;background:rgba(0,0,0,.18);
+  border:1px solid var(--line);border-radius:8px;height:2.6em;min-height:2.6em;max-height:2.6em;overflow:auto;word-break:break-all}
+#copyIcon{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;border:1px solid var(--line);border-radius:8px;background:transparent;display:grid;place-items:center;cursor:pointer}
+#copyIcon svg{width:18px;height:18px;fill:currentColor}
+
+/* BeanTag collassato di default */
+#beanPanel{display:none}
+#beanPanel.open{display:flex}
+
