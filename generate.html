@@ -54,12 +54,13 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)
 
 /* Maniglia (drag) piccola a destra, non ruba spazio */
 .handle{
+  position:relative;
   width:34px;height:46px;border:1px dashed var(--line);
   border-radius:10px;display:grid;place-items:center;
   color:var(--fg);cursor:grab;user-select:none;touch-action:none
 }
 .handle:active{cursor:grabbing}
-.dots{width:14px;height:22px;opacity:.9}
+.dots{height:22px;opacity:.9;margin-top: -12px;}
 
 /* X compatta in alto-destra */
 .xbtn{
