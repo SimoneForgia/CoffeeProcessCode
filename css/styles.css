@@ -85,16 +85,6 @@ details summary::-webkit-details-marker{display:none}
 #beanPanel.open{display:flex}
 
 
-:root{
-  --bg:#E63E62;            /* cherry-rose primary */
-  --card:#8F2A46;          /* deep plum for cards */
-  --line:#6E1F36;          /* separators/borders */
-  --muted:#FFD5E1;         /* soft rose for hints */
-  --ink:#000000;           /* single-ink (black) for BeanTag/icons */
-  --btn:#6B1631;           /* buttons background */
-  --btnHover:#5A1229;
-  --fg:#FFFFFF;            /* all text = white */
-}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,Segoe UI,Roboto,Helvetica,Arial}
 .wrap{max-width:900px;margin:0 auto;padding:16px}
