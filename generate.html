@@ -19,21 +19,29 @@
     <button id="addStep" class="icon-btn">＋ Add step</button>
     <button id="clearAll" class="ghost">Clear</button>
   </div>
+  <div class="actions" style="margin-top:8px">
+  <button id="gen" title="Generate CPC">Generate code</button>
+</div>
+
 
   <div class="card">
     <div class="cpc-row">
-      <b>CPC</b>
-      <div id="cpc" class="mono"></div>
-      <button id="copyCpc" class="ghost">Copy CPC</button>
-    </div>
-    <div class="bean"><canvas id="beanCanvas" width="220" height="240" aria-label="BeanTag"></canvas></div>
+  <b>CPC</b>
+  <div id="cpcWrap">
+    <div id="cpc" class="mono"></div>
+    <button id="copyIcon" title="Copy CPC" aria-label="Copy CPC">
+      <!-- tua icona SVG -->
+      <svg viewBox="0 0 115.77 122.88" aria-hidden="true"><path d="M89.62,13.96v7.73h12.19v0.02c3.85,0.01,7.34,1.57,9.86,4.1c2.5,2.51,4.06,5.98,4.07,9.82v73.27h-0.02c-0.01,3.84-1.57,7.33-4.1,9.86c-2.51,2.5-5.98,4.06-9.82,4.07v0.02h-61.7v-0.02c-3.84-0.01-7.34-1.57-9.86-4.1c-2.5-2.51-4.06-5.98-4.07-9.82H13.96v-0.02c-3.84-0.01-7.34-1.57-9.86-4.1c-2.5-2.51-4.06-5.98-4.07-9.82V13.96h0.02c0.01-3.85,1.58-7.34,4.1-9.86c2.51-2.5,5.98-4.06,9.82-4.07h61.7v0.02c3.85,0.01,7.34,1.57,9.86,4.1c2.5,2.51,4.06,5.98,4.07,9.82V13.96z M79.04,21.69v-7.73h0.02c0-0.91-0.39-1.75-1.01-2.37c-0.61-0.61-1.46-1-2.37-1h-61.7c-0.91,0-1.75,0.39-2.37,1.01c-0.61,0.61-1,1.46-1,2.37v64.59c0,0.91,0.39,1.75,1.01,2.37c0.61,0.61,1.46,1,2.37,1h12.19V35.65c0.01-3.85,1.58-7.34,4.1-9.86c2.51-2.5,5.98-4.06,9.82-4.07H79.04z M105.18,108.92V35.65c0-0.91-0.39-1.75-1.01-2.37c-0.61-0.61-1.46-1-2.37-1h-61.7c-0.91,0-1.75,0.39-2.37,1.01c-0.61,0.61-1,1.46-1,2.37v73.27c0,0.91,0.39,1.75,1.01,2.37c0.61,0.61,1.46,1,2.37,1h61.7c0.91,0,1.75-0.39,2.37-1.01c0.61-0.61,1-1.46,1-2.37z"/></svg>
+    </button>
+  </div>
+</div>
+    <div class="bean" id="beanPanel"><canvas id="beanCanvas" width="220" height="240" aria-label="BeanTag"></canvas></div>
     <div class="inline" style="justify-content:space-between;margin-top:8px">
       <a id="shareUrl" class="btn" href="#" target="_blank" rel="noopener">Open link</a>
       <div>
         <button id="dlPng" class="ghost">Download PNG</button>
         <button id="dlSvg" class="ghost">Download SVG</button>
       </div>
-      <button id="gen">Generate code</button>
     </div>
     <p id="hint" class="tiny" style="margin-top:8px"></p>
   </div>
