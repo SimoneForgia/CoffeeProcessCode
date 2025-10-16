@@ -10,9 +10,13 @@ const stepsWrap = $('#stepsWrap');
 const cpcEl = $('#cpc');
 const shareA = $('#shareUrl');
 const hint = $('#hint');
-const beanPanel = document.getElementById('beanPanel') || null; // opzionale (se non esiste: nessun errore)
+const beanPanel = document.getElementById('beanPanel') || null; // opzionale
 const canvas = document.getElementById('beanCanvas');
 const ctx = canvas.getContext('2d');
+
+/* Rendiamo il rail “trasparente” al tocco e fissiamo il contesto del drag */
+if (rail) rail.style.pointerEvents = 'none';
+if (stepsWrap) stepsWrap.style.position = 'relative';
 
 /* ------- Rail between fixed steps ------- */
 function setRail() {
@@ -55,11 +59,13 @@ function buildStepBlock(i){
   card.className = 'step';
   card.dataset.index = i;
 
+  // numero “1)” a sinistra, select che riempie, maniglia a destra, X in alto-destra
   card.innerHTML = `
     <button class="xbtn" title="Remove" aria-label="Remove">×</button>
-    <div class="step-grid">
-      <div class="num">${i+1})</div>
-      <div class="pill">
+    <div class="inline" style="gap:8px;display:grid;grid-template-columns:auto 1fr auto;align-items:end">
+      <div class="mono" aria-hidden="true" style="padding:10px 6px 0 2px">${i+1})</div>
+      <div>
+        <label for="sel-${i}">Select an operation…</label>
         <select id="sel-${i}">
           <option value="">Select an operation…</option>
           ${CATALOG.map(o=>`<option value="${o.main}" ${s.main===o.main?'selected':''}>${o.label}</option>`).join('')}
@@ -76,7 +82,7 @@ function buildStepBlock(i){
   `;
   stepsWrap.appendChild(card);
 
-  // remove
+  // remove (consentito anche sui primi due; la validazione sta nel Generate)
   card.querySelector('.xbtn').addEventListener('click', ()=>{
     steps.splice(i,1);
     refreshSteps();
@@ -90,7 +96,7 @@ function buildStepBlock(i){
     renderExtras(i, cfg, s); setRail();
   });
 
-  // pointer-based drag (mouse + touch)
+  // drag (mouse + touch) via Pointer Events
   const handle = card.querySelector('.handle');
   handle.addEventListener('pointerdown', (ev)=> startDrag(ev, card));
 
@@ -152,80 +158,93 @@ function refreshSteps(){
   setRail();
 }
 
-/* === Drag & drop fluido stile iOS (Pointer Events) === */
-let drag={active:false, el:null, startY:0, startIndex:0, ph:null, parentRect:null};
+/* === Drag & drop fluido stile iOS (Pointer Events, con translateY) === */
+let drag = { active:false, el:null, startPageY:0, startIndex:0, ph:null, baseTop:0 };
 
 function startDrag(ev, el){
   ev.preventDefault();
   el.setPointerCapture?.(ev.pointerId);
-  drag.active=true; drag.el=el; drag.startY=ev.clientY;
-  drag.startIndex=[...stepsWrap.children].indexOf(el);
-  drag.parentRect = stepsWrap.getBoundingClientRect();
 
-  // placeholder
-  drag.ph=document.createElement('div');
-  drag.ph.className='step';
-  drag.ph.style.visibility='hidden';
-  drag.ph.style.height=el.getBoundingClientRect().height+'px';
+  drag.active = true;
+  drag.el = el;
+  drag.startPageY = ev.pageY;            // usa pageY per non “saltare” con lo scroll
+  drag.startIndex = [...stepsWrap.children].indexOf(el);
+  drag.baseTop = el.offsetTop;
+
+  // placeholder che occupa spazio
+  drag.ph = document.createElement('div');
+  drag.ph.className = 'step';
+  drag.ph.style.visibility = 'hidden';
+  drag.ph.style.height = el.getBoundingClientRect().height + 'px';
   stepsWrap.insertBefore(drag.ph, el.nextSibling);
 
-  // elevate element
-  const rect=el.getBoundingClientRect();
+  // “stacchiamo” l’elemento, ma lo muoviamo con translateY: segue il dito
   el.classList.add('drag-ghost');
-  el.style.position='absolute';
-  el.style.left=(rect.left - drag.parentRect.left)+'px';
-  el.style.width=rect.width+'px';
-  el.style.top=(el.offsetTop)+'px';
-  el.style.pointerEvents='none';
+  el.style.position = 'absolute';
+  el.style.left = el.offsetLeft + 'px';
+  el.style.width = el.offsetWidth + 'px';
+  el.style.top = drag.baseTop + 'px';
+  el.style.transform = 'translateY(0px)';
+  el.style.pointerEvents = 'none';
 
   window.addEventListener('pointermove', onDragMove);
-  window.addEventListener('pointerup', endDrag, {once:true});
+  window.addEventListener('pointerup', endDrag, { once:true });
 }
 
 function onDragMove(ev){
   if(!drag.active) return;
-  const el=drag.el;
-  const dy = ev.clientY - drag.startY;
-  drag.startY = ev.clientY;
-  el.style.top = (el.offsetTop + dy) + 'px';
+  const el = drag.el;
 
-  // calcola posizione target in base al centro dell’elemento
-  const center = el.offsetTop + el.offsetHeight/2;
+  // delta rispetto all’ultimo evento, con pageY (robusto su touch)
+  const dy = ev.pageY - drag.startPageY;
+  drag.startPageY = ev.pageY;
+
+  // muovi l’elemento
+  const currentY = parseFloat(el.style.transform.replace(/translateY\\(([-0-9.]+)px\\)/,'$1')) || 0;
+  const nextY = currentY + dy;
+  el.style.transform = `translateY(${nextY}px)`;
+
+  // posizione del centro per decidere dove mettere la placeholder
+  const center = el.offsetTop + nextY + el.offsetHeight/2;
+
   let targetIndex = Array.from(stepsWrap.children).indexOf(drag.ph);
-  for(let k=0;k<stepsWrap.children.length;k++){
-    const n = stepsWrap.children[k];
-    if(n===el) continue;
+  const kids = Array.from(stepsWrap.children).filter(n=>n!==el);
+  for(let k=0;k<kids.length;k++){
+    const n = kids[k];
     const mid = n.offsetTop + n.offsetHeight/2;
     if(center < mid){ targetIndex = k; break; } else { targetIndex = k+1; }
   }
-  if(stepsWrap.children[targetIndex]!==drag.ph){
-    stepsWrap.insertBefore(drag.ph, stepsWrap.children[targetIndex]||null);
+  if(stepsWrap.children[targetIndex] !== drag.ph){
+    stepsWrap.insertBefore(drag.ph, stepsWrap.children[targetIndex] || null);
   }
 }
 
 function endDrag(){
   if(!drag.active) return;
+
   const from = drag.startIndex;
   const finalIndex = [...stepsWrap.children].indexOf(drag.ph);
+
+  // rimetti l’elemento al posto della placeholder
   stepsWrap.insertBefore(drag.el, drag.ph);
 
-  // reset styles
-  const el=drag.el;
-  el.style.position=''; el.style.top=''; el.style.left=''; el.style.width=''; el.style.pointerEvents='';
+  // reset stile
+  const el = drag.el;
+  el.style.position=''; el.style.top=''; el.style.left=''; el.style.width='';
+  el.style.transform=''; el.style.pointerEvents='';
   el.classList.remove('drag-ghost');
   drag.ph.remove();
 
-  // aggiorna stato
-  const to = finalIndex>from? finalIndex-1 : finalIndex;
+  // aggiorna stato (“fa spazio” definitivo)
+  const to = finalIndex > from ? finalIndex - 1 : finalIndex;
   const [moved] = steps.splice(from,1);
   steps.splice(to,0,moved);
-  drag={active:false, el:null, startY:0, startIndex:0, ph:null, parentRect:null};
 
+  drag = { active:false, el:null, startPageY:0, startIndex:0, ph:null, baseTop:0 };
   refreshSteps();
 }
 
-
-/* ------- BeanTag drawing (esagono-dotcode-like) ------- */
+/* ------- BeanTag drawing (esagono/dotcode-like o tua variante attuale) ------- */
 async function drawBeanTag(payloadKey) {
   const w = canvas.width, h = canvas.height;
   const digest = await strongHash(payloadKey || '');
@@ -237,33 +256,29 @@ async function drawBeanTag(payloadKey) {
   ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#000';
   ctx.fillStyle = ctx.strokeStyle;
 
-  // Hexagon outline
+  // Esagono semplice
   const cx = 110, cy = 120, R = 90;
   const pts = [[cx, cy - R], [cx + R, cy - R / 2], [cx + R, cy + R / 2], [cx, cy + R], [cx - R, cy + R / 2], [cx - R, cy - R / 2]];
   ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < 6; i++) ctx.lineTo(pts[i][0], pts[i][1]); ctx.closePath(); ctx.stroke();
 
-  // Clip to hex
-  ctx.save();
-  ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < 6; i++) ctx.lineTo(pts[i][0], pts[i][1]); ctx.closePath(); ctx.clip();
+  // Clip a esagono
+  ctx.save(); ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]); for (let i=1;i<6;i++) ctx.lineTo(pts[i][0],pts[i][1]); ctx.closePath(); ctx.clip();
 
-  // Dot grid
+  // Griglia di punti (deterministica)
   const pad = 14, innerR = R - pad, cols = 19, rowH = (innerR * 2) / (cols * 0.9);
   for (let r = 0; r < cols; r++) {
     const y = cy - innerR + r * rowH;
     const offset = (r % 2 ? 0.5 : 0), rowCols = cols - (r % 2 ? 1 : 0);
     for (let c = 0; c < rowCols; c++) {
       const x = (cx - innerR) + (c + offset) * ((innerR * 2) / cols);
-      // quick point-in-hex
-      let inside = true; for (let k = 0; k < 6; k++) { const a = pts[k], b = pts[(k + 1) % 6]; if (((b[0] - a[0]) * (y - a[1]) - (b[1] - a[1]) * (x - a[0])) < 0) { inside = false; break; } }
-      if (!inside) continue;
       const sel = (((mix >>> ((r * 3 + c) % 24)) & 1) ^ (((r * 31 + c * 17) & 7) === 0 ? 1 : 0));
-      if (sel) { const s = 1.6 + rnd() * 0.4; ctx.beginPath(); ctx.arc(x, y, s / 2, 0, Math.PI * 2); ctx.fill(); }
+      if (sel) { const s = 1.6 + rnd() * 0.4; ctx.fillRect(x-s/2, y-s/2, s, s); }
     }
   }
   ctx.restore();
 
-  // Short marker
+  // short marker
   const short = (mix >>> 0).toString(36).toUpperCase();
   ctx.font = '10px ui-monospace,monospace'; ctx.textAlign = 'center'; ctx.fillText(short, cx, h - 8);
 }
@@ -273,7 +288,8 @@ async function exportSVG(payloadKey) {
   const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#000';
   const pts = [[cx, cy - R], [cx + R, cy - R / 2], [cx + R, cy + R / 2], [cx, cy + R], [cx - R, cy + R / 2], [cx - R, cy - R / 2]];
   const hexPath = `M${pts.map(p => p.join(',')).join(' L ')} Z`;
-  const mix = (await strongHash(payloadKey)).reduce((a, b) => a ^ b) >>> 0;
+  const digest = await strongHash(payloadKey);
+  const mix = (digest[0]^digest[1]^digest[2]^digest[3])>>>0;
   const pad = 14, innerR = R - pad, cols = 19, cellW = (innerR * 2) / cols, rowH = (innerR * 2) / (cols * 0.9);
   const dots = [];
   for (let r = 0; r < cols; r++) {
@@ -281,12 +297,11 @@ async function exportSVG(payloadKey) {
     for (let c = 0; c < rowCols; c++) {
       const x = (cx - innerR) + (c + offset) * cellW;
       const sel = (((mix >>> ((r * 3 + c) % 24)) & 1) ^ (((r * 31 + c * 17) & 7) === 0 ? 1 : 0));
-      if (sel) { dots.push(`<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="0.9" fill="${ink}"/>`); }
+      if (sel) { dots.push(`<rect x="${(x-0.9).toFixed(2)}" y="${(y-0.9).toFixed(2)}" width="${(1.8).toFixed(2)}" height="${(1.8).toFixed(2)}" fill="${ink}"/>`); }
     }
   }
-  const payload = encodeURIComponent(payloadKey);
   const short = (mix >>> 0).toString(36).toUpperCase();
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" data-encoder="dotcode-like-v1" data-payload="${payload}">\n<rect width="${w}" height="${h}" fill="#FFFFFF"/>\n<path d="${hexPath}" fill="none" stroke="${ink}" stroke-width="2"/>\n${dots.join('\\n')}\n<text x="${cx}" y="${h-8}" text-anchor="middle" fill="${ink}" font-size="10" font-family="ui-monospace, monospace">${short}</text>\n</svg>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" data-encoder="dotcode-like-v1" data-payload="${encodeURIComponent(payloadKey)}">\n<rect width="${w}" height="${h}" fill="#FFFFFF"/>\n<path d="${hexPath}" fill="none" stroke="${ink}" stroke-width="2"/>\n${dots.join('\\n')}\n<text x="${cx}" y="${h-8}" text-anchor="middle" fill="${ink}" font-size="10" font-family="ui-monospace, monospace">${short}</text>\n</svg>`;
 }
 
 /* ------- Outputs (CPC/link/tag) ------- */
@@ -324,42 +339,17 @@ $('#gen')?.addEventListener('click', async () => {
   redrawLinkAndTag(cpc); setRail();
 });
 
-// Copy CPC via icona dentro il box (fallback su #copyCpc se presente)
-const copyIcon = document.getElementById('copyIcon');
-if (copyIcon) {
-  copyIcon.addEventListener('click', () => {
-    const t = cpcEl.textContent.trim(); if (!t) { alert('Generate the code first.'); return; }
-    navigator.clipboard.writeText(t).catch(() => alert('Copy failed.'));
-  });
-} else {
-  // compat vecchio markup
-  $('#copyCpc')?.addEventListener('click', () => {
-    const t = cpcEl.textContent.trim(); if (!t) { alert('Generate the code first.'); return; }
-    navigator.clipboard.writeText(t).catch(() => alert('Copy failed.'));
-  });
-}
+// Copy CPC (eventuale icona o fallback bottone)
+(document.getElementById('copyIcon') || document.getElementById('copyCpc'))?.addEventListener('click', ()=>{
+  const t=cpcEl.textContent.trim(); if(!t){alert('Generate the code first.');return;}
+  navigator.clipboard.writeText(t).catch(()=>alert('Copy failed.'));
+});
 
-// Download unico con menu
+// Download unico con menu (se presente)
 const dlMenu = document.getElementById('dlMenu');
-document.getElementById('downloadBtn')?.addEventListener('click', () => { dlMenu?.classList.toggle('open'); });
-document.getElementById('dlPng')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  const link = document.createElement('a');
-  link.href = canvas.toDataURL('image/png');
-  link.download = 'BeanTag.png';
-  document.body.appendChild(link); link.click(); link.remove();
-  dlMenu?.classList.remove('open');
-});
-document.getElementById('dlSvg')?.addEventListener('click', async (e) => {
-  e.preventDefault();
-  const cpc = cpcEl.textContent.trim();
-  const opt = buildOpt();
-  const svg = await exportSVG((cpc || '') + '|' + (opt ? JSON.stringify(opt) : ''));
-  const blob = new Blob([svg], { type: 'image/svg+xml' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'BeanTag.svg';
-  document.body.appendChild(a); a.click(); a.remove();
-  dlMenu?.classList.remove('open');
-});
+document.getElementById('downloadBtn')?.addEventListener('click', ()=>{ dlMenu?.classList.toggle('open'); });
+document.getElementById('dlPng')?.addEventListener('click', (e)=>{ e.preventDefault(); const link=document.createElement('a'); link.href=canvas.toDataURL('image/png'); link.download='BeanTag.png'; document.body.appendChild(link); link.click(); link.remove(); dlMenu?.classList.remove('open'); });
+document.getElementById('dlSvg')?.addEventListener('click', async (e)=>{ e.preventDefault(); const cpc=cpcEl.textContent.trim(); const opt = buildOpt(); const svg=await exportSVG((cpc||'')+'|'+(opt?JSON.stringify(opt):'')); const blob=new Blob([svg],{type:'image/svg+xml'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='BeanTag.svg'; document.body.appendChild(a); a.click(); a.remove(); dlMenu?.classList.remove('open'); });
 
 // Prefill from URL (?cpc=...)
 (function prefillFromURL() {
@@ -370,7 +360,7 @@ document.getElementById('dlSvg')?.addEventListener('click', async (e) => {
     if (!m) return blankStep();
     const [, L, S, H] = m;
     return { main: L, sub: S || '', hours: H || '', extras: { temp: '', ph: '' } };
-    });
+  });
   if (steps.length < 2) steps = [blankStep(), blankStep()];
   refreshAndRail();
 })();
