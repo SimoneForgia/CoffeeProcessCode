@@ -65,7 +65,6 @@ function buildStepBlock(i){
     <div class="inline" style="gap:8px;display:grid;grid-template-columns:auto 1fr auto;align-items:end">
       <div class="mono" aria-hidden="true" style="padding:10px 6px 0 2px">${i+1})</div>
       <div>
-        <label for="sel-${i}">Select an operation…</label>
         <select id="sel-${i}">
           <option value="">Select an operation…</option>
           ${CATALOG.map(o=>`<option value="${o.main}" ${s.main===o.main?'selected':''}>${o.label}</option>`).join('')}
