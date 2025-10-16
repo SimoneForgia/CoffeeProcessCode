@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Generate — Coffee Process Code</title>
+<link rel="stylesheet" href="css/styles.css">
+</head><body>
+<div class="wrap">
+  <h1>Generate</h1>
+  <p class="lead">Design your processing timeline → CPC + BeanTag (one-ink).</p>
+
+  <div class="timeline card">
+    <div class="rail" id="rail" aria-hidden="true" style="top:0;height:0"></div>
+
+    <div class="step fixed" id="fixed-start"><b>Picking</b></div>
+    <div id="stepsWrap"></div>
+    <div class="step fixed" id="fixed-end"><b>Hulling</b></div>
+  </div>
+
+  <div class="actions">
+    <button id="addStep" class="icon-btn">＋ Add step</button>
+    <button id="clearAll" class="ghost">Clear</button>
+  </div>
+
+  <div class="card">
+    <div class="cpc-row">
+      <b>CPC</b>
+      <div id="cpc" class="mono"></div>
+      <button id="copyCpc" class="ghost">Copy CPC</button>
+    </div>
+    <div class="bean"><canvas id="beanCanvas" width="220" height="240" aria-label="BeanTag"></canvas></div>
+    <div class="inline" style="justify-content:space-between;margin-top:8px">
+      <a id="shareUrl" class="btn" href="#" target="_blank" rel="noopener">Open link</a>
+      <div>
+        <button id="dlPng" class="ghost">Download PNG</button>
+        <button id="dlSvg" class="ghost">Download SVG</button>
+      </div>
+      <button id="gen">Generate code</button>
+    </div>
+    <p id="hint" class="tiny" style="margin-top:8px"></p>
+  </div>
+</div>
+
+<script type="module" src="js/generator.js"></script>
+</body></html>
