@@ -2,6 +2,25 @@
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Generate — Coffee Process Code</title>
 <link rel="stylesheet" href="css/styles.css">
+
+<style>
+/* v5.3 — Step visuals + DnD */
+.step{position:relative;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--card);margin:14px 0;z-index:1;transition:transform .18s ease}
+.step.drag-ghost{opacity:.9;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99}
+.step-grid{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+.num{font-weight:800;font-size:24px;line-height:1;white-space:nowrap;padding:6px 6px 6px 2px}
+.pill{background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:14px;padding:6px}
+.pill select{width:100%;height:46px;border:0;background:transparent;color:var(--fg);font-size:18px}
+.handle{width:34px;height:46px;border:1px dashed var(--line);border-radius:10px;display:grid;place-items:center;color:var(--fg);cursor:grab;user-select:none;touch-action:none}
+.handle:active{cursor:grabbing}
+.dots{width:14px;height:22px;opacity:.9}
+.xbtn{position:absolute;right:8px;top:8px;width:28px;height:28px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.18);color:var(--fg);font-weight:900;display:grid;place-items:center;cursor:pointer}
+.xbtn:hover{background:var(--btnHover)}
+/* opzionale: nasconde la rail dentro i box (visibile solo agli estremi) */
+.step{background-clip:padding-box}
+</style>
+
+  
 </head><body>
 <div class="wrap">
   <h1>CPC code and BeanTag generator</h1>
