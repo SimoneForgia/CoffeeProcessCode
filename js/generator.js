@@ -49,62 +49,52 @@ function linkFrom(cpc, opt) {
 }
 
 /* ------- Step UI ------- */
-function buildStepBlock(i) {
+function buildStepBlock(i){
   const s = steps[i];
   const card = document.createElement('div');
   card.className = 'step';
   card.dataset.index = i;
-  card.draggable = true;
 
   card.innerHTML = `
-    <button class="handle" title="Drag to reorder" aria-label="Reorder">≡</button>
-    <button class="close" title="Remove step" aria-label="Remove">×</button>
-
-    <div class="row">
-      <label class="num">${i + 1})</label>
-      <select id="sel-${i}">
-        <option value="">Select an operation…</option>
-        ${CATALOG.map(o => `<option value="${o.main}" ${s.main === o.main ? 'selected' : ''}>${o.label}</option>`).join('')}
-      </select>
+    <button class="xbtn" title="Remove" aria-label="Remove">×</button>
+    <div class="step-grid">
+      <div class="num">${i+1})</div>
+      <div class="pill">
+        <select id="sel-${i}">
+          <option value="">Select an operation…</option>
+          ${CATALOG.map(o=>`<option value="${o.main}" ${s.main===o.main?'selected':''}>${o.label}</option>`).join('')}
+        </select>
+      </div>
+      <button class="handle" title="Reorder" aria-label="Reorder">
+        <svg class="dots" viewBox="0 0 14 22" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          ${Array.from({length:6}).map((_,r)=>Array.from({length:2})
+            .map((_,c)=>`<circle cx="${4+c*6}" cy="${3+r*3.5}" r="1.1" fill="currentColor"/>`).join('')).join('')}
+        </svg>
+      </button>
     </div>
-
     <div id="extras-${i}" class="row"></div>
   `;
-
   stepsWrap.appendChild(card);
 
-  // Change op
-  card.querySelector('#sel-' + i).addEventListener('change', e => {
+  // remove
+  card.querySelector('.xbtn').addEventListener('click', ()=>{
+    steps.splice(i,1);
+    refreshSteps();
+  });
+
+  // change main
+  card.querySelector('#sel-'+i).addEventListener('change', e=>{
     const main = e.target.value;
-    const cfg = CATALOG.find(x => x.main === main) || { duration: false, extras: false, sub: [] };
-    s.main = main; s.sub = ''; s.hours = ''; s.extras = { temp: '', ph: '' };
+    const cfg = CATALOG.find(x=>x.main===main) || {duration:false,extras:false,sub:[]};
+    s.main = main; s.sub = ''; s.hours=''; s.extras={temp:'',ph:''};
     renderExtras(i, cfg, s); setRail();
   });
 
-  // Remove
-  card.querySelector('.close').addEventListener('click', () => {
-    steps.splice(i, 1);
-    refreshSteps();
-  });
+  // pointer-based drag (mouse + touch)
+  const handle = card.querySelector('.handle');
+  handle.addEventListener('pointerdown', (ev)=> startDrag(ev, card));
 
-  // Drag & drop
-  card.addEventListener('dragstart', (ev) => {
-    ev.dataTransfer.setData('text/plain', String(i));
-    card.classList.add('dragging');
-  });
-  card.addEventListener('dragend', () => card.classList.remove('dragging'));
-  card.addEventListener('dragover', (ev) => ev.preventDefault());
-  card.addEventListener('drop', (ev) => {
-    ev.preventDefault();
-    const from = parseInt(ev.dataTransfer.getData('text/plain'), 10);
-    const to = parseInt(card.dataset.index, 10);
-    if (isNaN(from) || isNaN(to) || from === to) return;
-    const [moved] = steps.splice(from, 1);
-    steps.splice(to, 0, moved);
-    refreshSteps();
-  });
-
-  renderExtras(i, CATALOG.find(x => x.main === s.main) || { duration: false, extras: false, sub: [] }, s);
+  renderExtras(i, CATALOG.find(x=>x.main===s.main)||{duration:false,extras:false,sub:[]}, s);
 }
 
 function renderExtras(i, cfg, s) {
@@ -156,11 +146,84 @@ function renderExtras(i, cfg, s) {
   }
 }
 
-function refreshSteps() {
-  stepsWrap.innerHTML = '';
-  steps.forEach((_, i) => buildStepBlock(i));
+function refreshSteps(){
+  stepsWrap.innerHTML='';
+  steps.forEach((_,i)=> buildStepBlock(i));
   setRail();
 }
+
+/* === Drag & drop fluido stile iOS (Pointer Events) === */
+let drag={active:false, el:null, startY:0, startIndex:0, ph:null, parentRect:null};
+
+function startDrag(ev, el){
+  ev.preventDefault();
+  el.setPointerCapture?.(ev.pointerId);
+  drag.active=true; drag.el=el; drag.startY=ev.clientY;
+  drag.startIndex=[...stepsWrap.children].indexOf(el);
+  drag.parentRect = stepsWrap.getBoundingClientRect();
+
+  // placeholder
+  drag.ph=document.createElement('div');
+  drag.ph.className='step';
+  drag.ph.style.visibility='hidden';
+  drag.ph.style.height=el.getBoundingClientRect().height+'px';
+  stepsWrap.insertBefore(drag.ph, el.nextSibling);
+
+  // elevate element
+  const rect=el.getBoundingClientRect();
+  el.classList.add('drag-ghost');
+  el.style.position='absolute';
+  el.style.left=(rect.left - drag.parentRect.left)+'px';
+  el.style.width=rect.width+'px';
+  el.style.top=(el.offsetTop)+'px';
+  el.style.pointerEvents='none';
+
+  window.addEventListener('pointermove', onDragMove);
+  window.addEventListener('pointerup', endDrag, {once:true});
+}
+
+function onDragMove(ev){
+  if(!drag.active) return;
+  const el=drag.el;
+  const dy = ev.clientY - drag.startY;
+  drag.startY = ev.clientY;
+  el.style.top = (el.offsetTop + dy) + 'px';
+
+  // calcola posizione target in base al centro dell’elemento
+  const center = el.offsetTop + el.offsetHeight/2;
+  let targetIndex = Array.from(stepsWrap.children).indexOf(drag.ph);
+  for(let k=0;k<stepsWrap.children.length;k++){
+    const n = stepsWrap.children[k];
+    if(n===el) continue;
+    const mid = n.offsetTop + n.offsetHeight/2;
+    if(center < mid){ targetIndex = k; break; } else { targetIndex = k+1; }
+  }
+  if(stepsWrap.children[targetIndex]!==drag.ph){
+    stepsWrap.insertBefore(drag.ph, stepsWrap.children[targetIndex]||null);
+  }
+}
+
+function endDrag(){
+  if(!drag.active) return;
+  const from = drag.startIndex;
+  const finalIndex = [...stepsWrap.children].indexOf(drag.ph);
+  stepsWrap.insertBefore(drag.el, drag.ph);
+
+  // reset styles
+  const el=drag.el;
+  el.style.position=''; el.style.top=''; el.style.left=''; el.style.width=''; el.style.pointerEvents='';
+  el.classList.remove('drag-ghost');
+  drag.ph.remove();
+
+  // aggiorna stato
+  const to = finalIndex>from? finalIndex-1 : finalIndex;
+  const [moved] = steps.splice(from,1);
+  steps.splice(to,0,moved);
+  drag={active:false, el:null, startY:0, startIndex:0, ph:null, parentRect:null};
+
+  refreshSteps();
+}
+
 
 /* ------- BeanTag drawing (esagono-dotcode-like) ------- */
 async function drawBeanTag(payloadKey) {
