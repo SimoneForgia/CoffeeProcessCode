@@ -280,8 +280,7 @@ canvas#beanCanvas{width:min(64vw,260px);height:auto;background:#FFFFFF;border-ra
   right:6px;
   top:50%;
   transform:translateY(-50%); /* centratura verticale perfetta */
-  width:32px;height:32px;
-  border:1px solid var(--line);
+  width:32px;
   border-radius:8px;
   background:transparent;
   display:grid;place-items:center;
