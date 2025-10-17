@@ -32,12 +32,18 @@ function renderVerticalSummary(cpc){
     const right=document.createElement('div');
     const mainLabel=(CATALOG.find(x=>x.main===g.main)||{}).label || 'Unknown';
     right.appendChild(makeDetails(g.main, mainLabel, g.main));
-    if(g.sub){
-      const subRow=document.createElement('div'); subRow.style.marginTop='6px'; subRow.className='inline';
-      const code2=document.createElement('div'); code2.className='sum-code mono'; code2.style.width='40px'; code2.textContent=g.sub; subRow.appendChild(code2);
-      subRow.appendChild(makeDetails('S'+g.sub, SUB_LABELS[g.sub]||g.sub, 'S'+g.sub));
-      right.appendChild(subRow);
-    }
+    if (g.sub) {
+  const li2 = document.createElement('li');
+  li2.className = 'sum-row';
+  const code2 = document.createElement('div');
+  code2.className = 'sum-code mono';
+  code2.textContent = g.sub;           // lettera della sottocategoria
+  li2.appendChild(code2);
+  const right2 = document.createElement('div');
+  right2.appendChild(makeDetails('S' + g.sub, SUB_LABELS[g.sub] || g.sub, 'S' + g.sub));
+  li2.appendChild(right2);
+  summaryEl.appendChild(li2);
+}
     if (g.hours) {
   const hrRow = document.createElement('div');
   hrRow.style.marginTop = '6px';
