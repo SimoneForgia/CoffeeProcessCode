@@ -183,7 +183,8 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)
 .dots{height:22px;opacity:.9;margin-top:0;}
 
 /* X compatta in alto-destra */
-.xbtn {
+/* Bottone chiusura, con X disegnata via CSS (niente font) */
+.xbtn{
   position:absolute;
   right:-8px;
   top:-12px;
@@ -193,17 +194,34 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)
   border:1px solid var(--line);
   background:rgba(0,0,0,.18);
   color:var(--fg);
-  font-weight:900;
-  display:grid;
-  place-items:center;   /* centra la X perfettamente */
+  display:block;
   cursor:pointer;
-  font-size:15px;       /* regola se vuoi X più o meno grande */
-  line-height:1;
-  padding:0;            /* 🔹 niente padding */
+  padding:0;
+  line-height:0;      /* evita che eventuale testo influenzi l'allineamento */
+  font-size:0;        /* nasconde il testo se rimane nel markup */
 }
-.xbtn:hover {
-  background:var(--btnHover);
+.xbtn:hover{ background:var(--btnHover); }
+
+/* Disegno della X (due trattini centrati) */
+.xbtn::before,
+.xbtn::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:14px;         /* lunghezza braccio */
+  height:2px;         /* spessore braccio (pari per il pixel snapping) */
+  background:currentColor;
+  transform-origin:center;
+  transform:translate(-50%,-50%) rotate(45deg);
+  border-radius:2px;  /* estremità leggermente arrotondate */
 }
+.xbtn::after{
+  transform:translate(-50%,-50%) rotate(-45deg);
+}
+/* aumentare/diminuire */
+.xbtn::before, .xbtn::after{ width:16px; height:2px; }  /* esempio */
+
 
 /* Ghost durante drag */
 .step.drag-ghost{opacity:.9;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99}
