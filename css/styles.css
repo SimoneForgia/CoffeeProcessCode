@@ -53,7 +53,13 @@ label{font-weight:600;font-size:14px;white-space:nowrap}
 .trash{width:18px;height:18px;fill:var(--fg);opacity:.9}
 
 /* Output CPC layout (20/60/20) */
-.cpc-row{display:grid;grid-template-columns:20% 60% 20%;gap:12px;align-items:center}
+/* CPC row meglio bilanciata per far stare il testo su una riga */
+.cpc-row {
+  display: grid;
+  grid-template-columns: 32% 52% 16%; /* testo | codice | bottone copia */
+  gap: 12px;
+  align-items: center;
+}
 #cpc{line-height:1.2;padding:6px 10px;background:rgba(0,0,0,.18);
   border:1px solid var(--line);border-radius:8px;max-height:2.2em;overflow:auto;word-break:break-all}
 
