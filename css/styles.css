@@ -108,10 +108,15 @@ details summary::-webkit-details-marker{display:none}
 }
 .step .handle:active{cursor:grabbing}
 
-/* BeanTag collassato di default */
+/* BeanTag: titolo sopra, box sotto; nascosto finché non è .open */
 #beanPanel{display:none}
-#beanPanel.open{display:flex}
+#beanPanel.open{display:flex; flex-direction:column; gap:8px}
 
+.bean-title{
+  font-size:16px;
+  font-weight:700;
+  white-space:nowrap;
+}
 
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,Segoe UI,Roboto,Helvetica,Arial}
