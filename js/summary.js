@@ -38,12 +38,26 @@ function renderVerticalSummary(cpc){
       subRow.appendChild(makeDetails('S'+g.sub, SUB_LABELS[g.sub]||g.sub, 'S'+g.sub));
       right.appendChild(subRow);
     }
-    if(g.hours){
-      const hrRow=document.createElement('div'); hrRow.style.marginTop='6px'; hrRow.className='inline';
-      const code3=document.createElement('div'); code3.className='sum-code mono'; code3.style.width='40px'; code3.textContent=g.hours; hrRow.appendChild(code3);
-      const label=document.createElement('div'); label.textContent=`${parseInt(g.hours,10)} hours`; hrRow.appendChild(label);
-      right.appendChild(hrRow);
-    }
+    if (g.hours) {
+  const hrRow = document.createElement('div');
+  hrRow.style.marginTop = '6px';
+  hrRow.className = 'inline';
+
+  const code3 = document.createElement('div');
+  code3.className = 'sum-code mono';
+  code3.style.width = '40px';
+  code3.textContent = g.hours;
+  hrRow.appendChild(code3);
+
+  const n = parseInt(g.hours, 10);
+  const isDays = (g.main === 'D' || g.main === 'R'); // Drying, Rest in parchment
+  const unit = isDays ? 'day' : 'hour';
+  const label = document.createElement('div');
+  label.textContent = `${n} ${unit}${n === 1 ? '' : 's'}`;
+  hrRow.appendChild(label);
+
+  right.appendChild(hrRow);
+}
     row.appendChild(right); summaryEl.appendChild(row);
     if(idx<groups.length-1){
       const dot=document.createElement('li'); dot.className='sum-row';
