@@ -222,6 +222,20 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)
 /* aumentare/diminuire */
 .xbtn::before, .xbtn::after{ width:16px; height:2px; }  /* esempio */
 
+/* X più piccola solo su desktop */
+@media (min-width: 768px) {
+  .xbtn::before,
+  .xbtn::after {
+    width: 10px;   /* bracci più corti (default 14px) */
+    ///*height: 1.8px; /* leggermente più sottili */
+  }
+
+  .xbtn {
+    width: 24px;   /* cerchio più piccolo */
+    height: 24px;
+  }
+}
+
 
 /* Ghost durante drag */
 .step.drag-ghost{opacity:.9;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99}
