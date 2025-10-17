@@ -40,8 +40,21 @@
     <div class="inline" style="justify-content:space-between;margin-top:8px">
       <a id="shareUrl" class="btn" href="#" target="_blank" rel="noopener">Open link</a>
       <div>
-        <button id="dlPng" class="ghost">Download PNG</button>
-        <button id="dlSvg" class="ghost">Download SVG</button>
+        
+
+<!-- Un solo menu per i download -->
+<div class="menu" id="downloadMenu">
+  <button class="ghost menu-trigger" id="downloadBtn" aria-expanded="false" aria-haspopup="true">
+    Download <span class="caret"></span>
+  </button>
+
+  <div class="menu-list" role="menu" aria-labelledby="downloadBtn">
+    <a href="#" id="dlPng" role="menuitem">PNG</a>
+    <a href="#" id="dlSvg" role="menuitem">SVG</a>
+  </div>
+</div>
+
+        
       </div>
     </div>
     <p id="hint" class="tiny" style="margin-top:8px"></p>
