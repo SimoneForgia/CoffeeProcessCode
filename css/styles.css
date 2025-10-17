@@ -112,12 +112,6 @@ details summary::-webkit-details-marker{display:none}
 #beanPanel{display:none}
 #beanPanel.open{display:flex; flex-direction:column; gap:8px}
 
-.bean-title{
-  font-size:16px;
-  font-weight:700;
-  white-space:nowrap;
-}
-
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,Segoe UI,Roboto,Helvetica,Arial}
 .wrap{max-width:900px;margin:0 auto;padding:16px}
@@ -242,6 +236,7 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)
   gap:8px;
 }
 .bean-title{
+  margin-top: 12px;
   font-size:16px;
   font-weight:700;
   white-space:nowrap;
@@ -252,11 +247,10 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)
 canvas#beanCanvas{width:min(64vw,260px);height:auto;background:#FFFFFF;border-radius:10px}
 
 /* CPC — testo a sinistra, box codice a destra; icona copia centrata */
-.cpc-row {
-  display: grid;
-  grid-template-columns: 32% 66%; /* testo | codice */
-  gap: 12px;
-  align-items: center;
+.cpc-row{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
 /* Box codice + icona copia */
