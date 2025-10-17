@@ -22,6 +22,9 @@ body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,Segoe
 .step > .card .inline{  /* fai occupare alla riga tutta la larghezza della sub-card */
   width:100%;
 }
+.step .inline{ align-items:center; }  /* già presente nella versione che ti ho dato */
+select{ line-height:1; }              /* piccola correzione per l’altezza interna della select */
+
 
 h1{font-size:20px;margin:6px 0 6px}
 p.lead{margin:0;color:var(--fg);opacity:.9;font-size:14px}
@@ -106,7 +109,6 @@ details summary::-webkit-details-marker{display:none}
   width:34px;height:46px;border:1px dashed var(--line);
   border-radius:10px;display:grid;place-items:center;
   color:var(--fg);cursor:grab;user-select:none;touch-action:none;
-  background:#8f2a46
 }
 .step .handle:active{cursor:grabbing}
 
@@ -163,10 +165,19 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)
 
 /* Maniglia (drag) piccola a destra, non ruba spazio */
 .handle{
-  position:relative;
-  width:34px;height:46px;border:1px dashed var(--line);
-  border-radius:10px;display:grid;place-items:center;
-  color:var(--fg);cursor:grab;user-select:none;touch-action:none
+  width:34px;
+  height:46px;
+  display:grid;
+  place-items:center;
+  color:var(--fg);
+  cursor:grab;
+  user-select:none;
+  touch-action:none;
+  background:transparent;   /* 🔹 niente sfondo */
+  border:none;              /* 🔹 niente bordo */
+}
+.handle:active{
+  cursor:grabbing;
 }
 .handle:active{cursor:grabbing}
 .dots{height:22px;opacity:.9;margin-top:0;}
