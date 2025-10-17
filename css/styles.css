@@ -8,24 +8,12 @@
   --btnHover:#5A1229;
   --fg:#FFFFFF;      /* text */
 }
+
+/* Base */
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,Segoe UI,Roboto,Helvetica,Arial}
 .wrap{max-width:900px;margin:0 auto;padding:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0}
-
-/* Centra verticalmente il contenuto delle sub-card dentro gli step */
-.step > .card{
-  display:flex;
-  align-items:center;   /* centra i figli in verticale */
-  padding:12px;         /* mantieni il padding simmetrico */
-}
-.step > .card .inline{  /* fai occupare alla riga tutta la larghezza della sub-card */
-  width:100%;
-}
-.step .inline{ align-items:center; }  /* già presente nella versione che ti ho dato */
-select{ line-height:1; }              /* piccola correzione per l’altezza interna della select */
-
-
 h1{font-size:20px;margin:6px 0 6px}
 p.lead{margin:0;color:var(--fg);opacity:.9;font-size:14px}
 
@@ -40,11 +28,12 @@ button.ghost{background:transparent;border:1px solid var(--line)}
 .actions{display:flex;gap:10px;justify-content:space-between;margin-top:6px}
 .tiny{font-size:12px;color:var(--muted)}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+select{ line-height:1; } /* piccola correzione per la select */
 
-/* Generate: timeline */
+/* Timeline */
 .timeline{position:relative}
-.rail{position:absolute;left:50%;width:2px;background:var(--fg);opacity:.35;z-index:0}
-.step{position:relative;display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin:14px 0;z-index:1}
+.rail{position:absolute;left:50%;width:2px;background:var(--fg);opacity:.35;z-index:0;pointer-events:none}
+.step{position:relative;display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin:14px 0;z-index:1;transition:transform .18s ease;background-clip:padding-box}
 .step.fixed{background:#7B2840}
 label{font-weight:600;font-size:14px;white-space:nowrap}
 .row{display:flex;flex-direction:column;gap:8px}
@@ -52,22 +41,122 @@ label{font-weight:600;font-size:14px;white-space:nowrap}
 .square{width:42px;min-width:42px;height:42px;display:grid;place-items:center;padding:0}
 .trash{width:18px;height:18px;fill:var(--fg);opacity:.9}
 
-/* Output CPC layout (20/60/20) */
-/* CPC row meglio bilanciata per far stare il testo su una riga */
-.cpc-row {
-  display: grid;
-  grid-template-columns: 32% 52% 16%; /* testo | codice | bottone copia */
-  gap: 12px;
-  align-items: center;
+/* Step controls */
+.step .close{
+  position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:8px;
+  border:1px solid var(--line);background:rgba(0,0,0,.18);
+  display:grid;place-items:center;cursor:pointer
 }
-#cpc{line-height:1.2;padding:6px 10px;background:rgba(0,0,0,.18);
-  border:1px solid var(--line);border-radius:8px;max-height:2.2em;overflow:auto;word-break:break-all}
+.step .close:hover{background:var(--btnHover)}
 
-/* BeanTag preview area */
-.bean{width:100%;display:flex;justify-content:center;align-items:center;padding:8px;background:#FFE7EE;border:1px dashed var(--line);border-radius:12px}
+/* Riga numero | select | maniglia */
+.step .inline{
+  display:grid;
+  grid-template-columns:auto 1fr 34px;
+  align-items:center;
+  gap:10px;
+}
+.step .num, .step .mono{
+  height:46px;display:flex;align-items:center;
+  padding:0 6px 0 2px !important; /* forza eventuale padding inline */
+  font-weight:700;
+}
+
+/* Maniglia */
+.handle{
+  width:34px;height:46px;display:grid;place-items:center;
+  color:var(--fg);cursor:grab;user-select:none;touch-action:none;
+  background:transparent;border:none;
+}
+.handle:active{cursor:grabbing}
+.dots{height:22px;opacity:.9;margin-top:0}
+
+/* X (chiudi) con pseudo-elementi, centrata */
+.xbtn{
+  position:absolute;right:-8px;top:-12px;width:28px;height:28px;border-radius:50%;
+  border:1px solid var(--line);background:rgba(0,0,0,.18);color:var(--fg);
+  display:block;cursor:pointer;padding:0;line-height:0;font-size:0
+}
+.xbtn:hover{ background:var(--btnHover); }
+.xbtn::before,.xbtn::after{
+  content:"";position:absolute;left:50%;top:50%;width:14px;height:2px;background:currentColor;
+  transform-origin:center;border-radius:2px
+}
+.xbtn::before{transform:translate(-50%,-50%) rotate(45deg)}
+.xbtn::after{transform:translate(-50%,-50%) rotate(-45deg)}
+@media (min-width:768px){
+  .xbtn{width:24px;height:24px}
+  .xbtn::before,.xbtn::after{width:10px}
+}
+
+/* Ghost durante drag */
+.step.drag-ghost{opacity:.9;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99}
+
+/* BeanTag — titolo sopra e box sotto; nascosto finché non è .open */
+#beanPanel{display:none}
+#beanPanel.open{display:flex;flex-direction:column;gap:8px}
+.bean-title{font-size:16px;font-weight:700;white-space:nowrap}
+.bean{
+  width:100%;display:flex;justify-content:center;align-items:center;
+  padding:8px;background:#FFE7EE;border:1px dashed var(--line);border-radius:12px
+}
 canvas#beanCanvas{width:min(64vw,260px);height:auto;background:#FFFFFF;border-radius:10px}
 
-/* Summary page: vertical list */
+/* CPC: titolo sopra e box codice sotto a tutta larghezza */
+.cpc-row{
+  display:flex;flex-direction:column;gap:8px;align-items:stretch
+}
+.cpc-row > b{font-size:16px;font-weight:700;white-space:nowrap}
+
+#cpcWrap{position:relative;width:100%}
+#cpc{
+  display:flex;align-items:center;
+  line-height:1.3;
+  padding:10px 44px 10px 12px;  /* spazio per l’icona a destra */
+  background:rgba(0,0,0,.18);
+  border:1px solid var(--line);
+  border-radius:8px;
+  min-height:46px;             /* coerente coi bottoni */
+  overflow:auto;word-break:break-all
+}
+#copyIcon{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  width:32px;height:32px;border:1px solid var(--line);border-radius:8px;
+  background:transparent;display:grid;place-items:center;cursor:pointer
+}
+#copyIcon svg{width:18px;height:18px;fill:currentColor}
+
+/* Download menu */
+.icon-btn{display:inline-flex;align-items:center;gap:8px}
+.caret{margin-left:6px;border:solid var(--fg);border-width:0 2px 2px 0;display:inline-block;padding:3px;transform:rotate(45deg)}
+.menu{position:relative;display:inline-block;width:100%}
+.menu .menu-trigger{width:100%;justify-content:center;display:flex;align-items:center;gap:8px}
+.caret{margin-left:6px;border:solid var(--fg);border-width:0 2px 2px 0;display:inline-block;padding:4px;transform:rotate(45deg);transition:transform .15s ease}
+.menu.open .caret{transform:rotate(-135deg)}
+.menu-list{
+  position:absolute;top:calc(100% + 6px);right:0;background:var(--card);
+  border:1px solid var(--line);border-radius:10px;min-width:160px;display:none;z-index:10
+}
+.menu.open .menu-list{display:block}
+.menu-list a{display:block;padding:10px 14px;color:var(--fg);text-decoration:none;border-bottom:1px solid var(--line)}
+.menu-list a:last-child{border-bottom:none}
+.menu-list a:hover{background:var(--btnHover)}
+
+/* Pulsanti quadrati piccoli (se usi ancora .square) */
+.square{width:42px;min-width:42px;height:42px;display:grid;place-items:center;padding:0}
+.trash{width:18px;height:18px;fill:var(--fg);opacity:.9}
+
+/* Riga 50/50 per Open link e Download */
+.split-2{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px
+}
+.split-2 .btn{
+  display:block;width:100%;height:46px;font-weight:800;font-size:16px;border-radius:14px;text-align:center
+}
+.split-2 .menu{width:100%}
+.split-2 .menu .menu-trigger{width:100%;height:46px;font-weight:800;font-size:16px;border-radius:14px}
+
+/* Summary page */
 #summary{list-style:none;margin:0;padding:0}
 .sum-row{display:grid;grid-template-columns:40px 1fr;align-items:start;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line)}
 .sum-code{font-weight:700;letter-spacing:.5px}
@@ -80,286 +169,5 @@ details summary::-webkit-details-marker{display:none}
 
 /* Home */
 .home-cta{display:grid;grid-template-columns:1fr;gap:12px}
-.home-cta a{display:block;text-align:center;text-decoration:none;background:var(--btn);
-  border:none;color:var(--fg);font-weight:800;padding:18px;border-radius:14px}
+.home-cta a{display:block;text-align:center;text-decoration:none;background:var(--btn);border:none;color:var(--fg);font-weight:800;padding:18px;border-radius:14px}
 .home-cta a:hover{background:var(--btnHover)}
-
-/* Step controls */
-/* Step controls — REPLACE */
-.step{position:relative}
-
-.step .close{
-  position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:8px;
-  border:1px solid var(--line);background:rgba(0,0,0,.18);display:grid;place-items:center;cursor:pointer
-}
-.step .close:hover{background:var(--btnHover)}
-
-/* Riga con: numero | select | handle  */
-.step .inline{
-  display:grid;
-  grid-template-columns:auto 1fr 34px;  /* numero | select | maniglia */
-  align-items:center;
-  gap:10px;
-}
-
-/* Numero (forzo anche se l’HTML ha .mono senza .num) */
-.step .num, .step .mono{
-  height:46px;
-  display:flex;align-items:center;
-  padding:0 6px 0 2px !important; /* sovrascrive l’inline padding dell’Inspector */
-  font-weight:700;
-}
-
-/* Maniglia */
-.step .handle{
-  width:34px;height:46px;border:1px dashed var(--line);
-  border-radius:10px;display:grid;place-items:center;
-  color:var(--fg);cursor:grab;user-select:none;touch-action:none;
-}
-.step .handle:active{cursor:grabbing}
-
-
-/* CPC row con icona copy integrata */
-.cpc-row{display:grid;grid-template-columns:20% 1fr;gap:12px;align-items:center}
-#cpcWrap{position:relative}
-#cpc{line-height:1.2;padding:10px 44px 10px 12px;background:rgba(0,0,0,.18);
-  border:1px solid var(--line);border-radius:8px;height:2.6em;min-height:2.6em;max-height:2.6em;overflow:auto;word-break:break-all}
-#copyIcon{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;border:1px solid var(--line);border-radius:8px;background:transparent;display:grid;place-items:center;cursor:pointer}
-#copyIcon svg{width:18px;height:18px;fill:currentColor}
-
-/* BeanTag collassato di default */
-#beanPanel{display:none}
-#beanPanel.open{display:flex}
-
-
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,Segoe UI,Roboto,Helvetica,Arial}
-.wrap{max-width:900px;margin:0 auto;padding:16px}
-header h1{font-size:20px;margin:6px 0 6px}
-header p{margin:0;color:var(--fg);opacity:.9;font-size:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0}
-
-/* Timeline & rail (rail invisibile dentro i box) */
-.timeline{position:relative}
-.rail{position:absolute;left:50%;width:2px;background:var(--fg);opacity:.35;z-index:0;pointer-events:none}
-#stepsWrap{position:relative} /* riferimento per drag assoluto */
-
-/* Step box */
-.step{position:relative;display:flex;flex-direction:column;gap:10px;
-      padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);
-      margin:14px 0;z-index:1;transition:transform .18s ease;background-clip:padding-box}
-.step.fixed{background:#7B2840;color:var(--fg)}
-
-/* Tipografia “com’era prima” */
-label{font-weight:600;font-size:14px}
-.num{font-weight:700;font-size:16px;line-height:1;white-space:nowrap;padding:10px 6px 0 2px}
-
-/* Campi */
-.row{display:flex;flex-direction:column;gap:8px}
-.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-select,input,button{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);
-  background:rgba(0,0,0,.18);color:var(--fg);font-size:16px;height:46px}
-select{cursor:pointer}
-button{background:var(--btn);border:none;color:var(--fg);font-weight:700;cursor:pointer}
-button:hover{background:var(--btnHover)}
-button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)}
-.actions{display:flex;gap:10px;justify-content:space-between;margin-top:6px}
-.tiny{font-size:12px;color:var(--muted)}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-.inline{display:flex;gap:10px;align-items:center}
-.right{margin-left:auto}
-
-/* Maniglia (drag) piccola a destra, non ruba spazio */
-.handle{
-  width:34px;
-  height:46px;
-  display:grid;
-  place-items:center;
-  color:var(--fg);
-  cursor:grab;
-  user-select:none;
-  touch-action:none;
-  background:transparent;   /* 🔹 niente sfondo */
-  border:none;              /* 🔹 niente bordo */
-}
-.handle:active{
-  cursor:grabbing;
-}
-.handle:active{cursor:grabbing}
-.dots{height:22px;opacity:.9;margin-top:0;}
-
-/* X compatta in alto-destra */
-/* Bottone chiusura, con X disegnata via CSS (niente font) */
-.xbtn{
-  position:absolute;
-  right:-8px;
-  top:-12px;
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  border:1px solid var(--line);
-  background:rgba(0,0,0,.18);
-  color:var(--fg);
-  display:block;
-  cursor:pointer;
-  padding:0;
-  line-height:0;      /* evita che eventuale testo influenzi l'allineamento */
-  font-size:0;        /* nasconde il testo se rimane nel markup */
-}
-.xbtn:hover{ background:var(--btnHover); }
-
-/* Disegno della X (due trattini centrati) */
-.xbtn::before,
-.xbtn::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:14px;         /* lunghezza braccio */
-  height:2px;         /* spessore braccio (pari per il pixel snapping) */
-  background:currentColor;
-  transform-origin:center;
-  transform:translate(-50%,-50%) rotate(45deg);
-  border-radius:2px;  /* estremità leggermente arrotondate */
-}
-.xbtn::after{
-  transform:translate(-50%,-50%) rotate(-45deg);
-}
-/* aumentare/diminuire */
-.xbtn::before, .xbtn::after{ width:16px; height:2px; }  /* esempio */
-
-/* X più piccola solo su desktop */
-@media (min-width: 768px) {
-  .xbtn::before,
-  .xbtn::after {
-    width: 10px;   /* bracci più corti (default 14px) */
-    ///*height: 1.8px; /* leggermente più sottili */
-  }
-
-  .xbtn {
-    width: 24px;   /* cerchio più piccolo */
-    height: 24px;
-  }
-}
-
-
-/* Ghost durante drag */
-.step.drag-ghost{opacity:.9;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99}
-
-/* BeanTag area */
-.bean{width:100%;display:flex;justify-content:center;align-items:center;
-      padding:8px;background:#FFE7EE;border:1px dashed var(--line);border-radius:12px}
-canvas#beanCanvas{width:min(64vw,260px);height:auto;background:#FFFFFF;border-radius:10px}
-
-/* CPC row meglio bilanciata per far stare il testo su una riga */
-.cpc-row {
-  display: grid;
-  grid-template-columns: 32% 66%; /* testo | codice */
-  gap: 12px;
-  align-items: center;
-}
-#cpc{line-height:1.2;padding:6px 10px;background:rgba(0,0,0,.18);
-     border:1px solid var(--line);border-radius:8px;max-height:2.2em;overflow:auto}
-a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
-      color:var(--fg);text-decoration:none;padding:10px 12px;border-radius:10px}
-
-/* Download menu */
-.icon-btn{display:inline-flex;align-items:center;gap:8px}
-.caret{margin-left:6px;border:solid var(--fg);border-width:0 2px 2px 0;display:inline-block;padding:3px;transform:rotate(45deg)}
-
-/* --- Dropdown Menu --- */
-.menu {
-  position: relative;
-  display: inline-block;
-  width: 100%;
-}
-
-.menu .menu-trigger {
-  width: 100%;
-  justify-content: center;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.caret {
-  margin-left: 6px;
-  border: solid var(--fg);
-  border-width: 0 2px 2px 0;
-  display: inline-block;
-  padding: 4px;
-  transform: rotate(45deg);
-  transition: transform 0.15s ease;
-}
-
-.menu.open .caret {
-  transform: rotate(-135deg); /* caret su quando il menu è aperto */
-}
-
-.menu-list {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  min-width: 160px;
-  display: none;
-  z-index: 10;
-}
-
-.menu.open .menu-list {
-  display: block;
-}
-
-.menu-list a {
-  display: block;
-  padding: 10px 14px;
-  color: var(--fg);
-  text-decoration: none;
-  border-bottom: 1px solid var(--line);
-}
-
-.menu-list a:last-child {
-  border-bottom: none;
-}
-
-.menu-list a:hover {
-  background: var(--btnHover);
-}
-
-
-/* Pulsanti quadrati piccoli (se usi ancora .square in qualche punto) */
-.square{width:42px;min-width:42px;height:42px;display:grid;place-items:center;padding:0}
-.trash{width:18px;height:18px;fill:var(--fg);opacity:.9}
-
-
-/* Riga divisa in due colonne uguali */
-.split-2{
-  display:grid;
-  grid-template-columns:1fr 1fr; /* 50% | 50% */
-  gap:10px;
-  margin-top:8px;
-}
-
-/* Open link a tutta larghezza, stessa altezza dei bottoni grandi */
-.split-2 .btn{
-  display:block;        /* invece di inline-block */
-  width:100%;
-  height:46px;          /* come Add step / Clear */
-  font-weight:800;
-  font-size:16px;
-  border-radius:14px;
-  text-align:center;
-}
-
-/* Il menu occupa tutta la colonna e il trigger ha la stessa altezza */
-.split-2 .menu{ width:100%; }
-.split-2 .menu .menu-trigger{
-  width:100%;
-  height:46px;          /* stessa altezza */
-  font-weight:800;
-  font-size:16px;
-  border-radius:14px;
-}
-
