@@ -255,12 +255,69 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
 /* Download menu */
 .icon-btn{display:inline-flex;align-items:center;gap:8px}
 .caret{margin-left:6px;border:solid var(--fg);border-width:0 2px 2px 0;display:inline-block;padding:3px;transform:rotate(45deg)}
-.menu{position:relative;display:inline-block}
-.menu-list{position:absolute;right:0;top:calc(100% + 6px);background:var(--card);border:1px solid var(--line);
-           border-radius:10px;min-width:160px;display:none;z-index:10}
-.menu-list a{display:block;padding:10px 12px;color:var(--fg);text-decoration:none;border-bottom:1px solid var(--line)}
-.menu-list a:last-child{border-bottom:none}
-.menu.open .menu-list{display:block}
+
+/* --- Dropdown Menu --- */
+.menu {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.menu .menu-trigger {
+  width: 100%;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.caret {
+  margin-left: 6px;
+  border: solid var(--fg);
+  border-width: 0 2px 2px 0;
+  display: inline-block;
+  padding: 4px;
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+.menu.open .caret {
+  transform: rotate(-135deg); /* caret su quando il menu è aperto */
+}
+
+.menu-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  min-width: 160px;
+  display: none;
+  z-index: 10;
+}
+
+.menu.open .menu-list {
+  display: block;
+}
+
+.menu-list a {
+  display: block;
+  padding: 10px 14px;
+  color: var(--fg);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+
+.menu-list a:last-child {
+  border-bottom: none;
+}
+
+.menu-list a:hover {
+  background: var(--btnHover);
+}
+
+
 
 /* Pulsanti quadrati piccoli (se usi ancora .square in qualche punto) */
 .square{width:42px;min-width:42px;height:42px;display:grid;place-items:center;padding:0}
