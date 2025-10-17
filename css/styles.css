@@ -52,16 +52,6 @@ label{font-weight:600;font-size:14px;white-space:nowrap}
 .square{width:42px;min-width:42px;height:42px;display:grid;place-items:center;padding:0}
 .trash{width:18px;height:18px;fill:var(--fg);opacity:.9}
 
-/* Output CPC layout (20/60/20) */
-/* CPC row meglio bilanciata per far stare il testo su una riga */
-.cpc-row {
-  display: grid;
-  grid-template-columns: 32% 52% 16%; /* testo | codice | bottone copia */
-  gap: 12px;
-  align-items: center;
-}
-#cpc{line-height:1.2;padding:6px 10px;background:rgba(0,0,0,.18);
-  border:1px solid var(--line);border-radius:8px;max-height:2.2em;overflow:auto;word-break:break-all}
 
 /* BeanTag preview area */
 .bean{width:100%;display:flex;justify-content:center;align-items:center;padding:8px;background:#FFE7EE;border:1px dashed var(--line);border-radius:12px}
@@ -117,15 +107,6 @@ details summary::-webkit-details-marker{display:none}
   color:var(--fg);cursor:grab;user-select:none;touch-action:none;
 }
 .step .handle:active{cursor:grabbing}
-
-
-/* CPC row con icona copy integrata */
-.cpc-row{display:grid;grid-template-columns:20% 1fr;gap:12px;align-items:center}
-#cpcWrap{position:relative}
-#cpc{line-height:1.2;padding:10px 44px 10px 12px;background:rgba(0,0,0,.18);
-  border:1px solid var(--line);border-radius:8px;height:2.6em;min-height:2.6em;max-height:2.6em;overflow:auto;word-break:break-all}
-#copyIcon{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;border:1px solid var(--line);border-radius:8px;background:transparent;display:grid;place-items:center;cursor:pointer}
-#copyIcon svg{width:18px;height:18px;fill:currentColor}
 
 /* BeanTag collassato di default */
 #beanPanel{display:none}
@@ -247,19 +228,65 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)
 .step.drag-ghost{opacity:.9;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99}
 
 /* BeanTag area */
+
+/* Titolo BeanTag sopra al box, visibile solo quando il pannello è aperto */
+#beanPanel{ display:none; }              /* già presente: lasciamo così */
+#beanPanel.open{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.bean-title{
+  font-size:16px;
+  font-weight:700;
+  white-space:nowrap;
+}
+
 .bean{width:100%;display:flex;justify-content:center;align-items:center;
       padding:8px;background:#FFE7EE;border:1px dashed var(--line);border-radius:12px}
 canvas#beanCanvas{width:min(64vw,260px);height:auto;background:#FFFFFF;border-radius:10px}
 
-/* CPC row meglio bilanciata per far stare il testo su una riga */
+/* CPC — testo a sinistra, box codice a destra; icona copia centrata */
 .cpc-row {
   display: grid;
   grid-template-columns: 32% 66%; /* testo | codice */
   gap: 12px;
   align-items: center;
 }
-#cpc{line-height:1.2;padding:6px 10px;background:rgba(0,0,0,.18);
-     border:1px solid var(--line);border-radius:8px;max-height:2.2em;overflow:auto}
+
+/* Box codice + icona copia */
+#cpcWrap{ position:relative; }
+
+#cpc{
+  display:flex;               /* centra verticalmente il contenuto */
+  align-items:center;
+  line-height:1.2;
+  padding:10px 44px 10px 12px; /* spazio a destra per l’icona */
+  background:rgba(0,0,0,.18);
+  border:1px solid var(--line);
+  border-radius:8px;
+  min-height:46px;            /* coerente con i bottoni */
+  overflow:auto;
+  word-break:break-all;
+}
+
+#copyIcon{
+  position:absolute;
+  right:6px;
+  top:50%;
+  transform:translateY(-50%); /* centratura verticale perfetta */
+  width:32px;height:32px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:transparent;
+  display:grid;place-items:center;
+  cursor:pointer;
+}
+#copyIcon svg{ width:18px;height:18px;fill:currentColor; }
+
+
+
+
 a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
       color:var(--fg);text-decoration:none;padding:10px 12px;border-radius:10px}
 
