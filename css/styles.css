@@ -251,8 +251,13 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)
       padding:8px;background:#FFE7EE;border:1px dashed var(--line);border-radius:12px}
 canvas#beanCanvas{width:min(64vw,260px);height:auto;background:#FFFFFF;border-radius:10px}
 
-/* CPC box: 60% codice, 20% bottone */
-.cpc-row{display:grid;grid-template-columns:20% 60% 20%;gap:12px;align-items:center}
+/* CPC row meglio bilanciata per far stare il testo su una riga */
+.cpc-row {
+  display: grid;
+  grid-template-columns: 32% 66%; /* testo | codice */
+  gap: 12px;
+  align-items: center;
+}
 #cpc{line-height:1.2;padding:6px 10px;background:rgba(0,0,0,.18);
      border:1px solid var(--line);border-radius:8px;max-height:2.2em;overflow:auto}
 a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
