@@ -12,6 +12,17 @@
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,Segoe UI,Roboto,Helvetica,Arial}
 .wrap{max-width:900px;margin:0 auto;padding:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0}
+
+/* Centra verticalmente il contenuto delle sub-card dentro gli step */
+.step > .card{
+  display:flex;
+  align-items:center;   /* centra i figli in verticale */
+  padding:12px;         /* mantieni il padding simmetrico */
+}
+.step > .card .inline{  /* fai occupare alla riga tutta la larghezza della sub-card */
+  width:100%;
+}
+
 h1{font-size:20px;margin:6px 0 6px}
 p.lead{margin:0;color:var(--fg);opacity:.9;font-size:14px}
 
