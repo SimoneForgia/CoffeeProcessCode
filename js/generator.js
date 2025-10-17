@@ -122,16 +122,18 @@ function renderExtras(i, cfg, s) {
 
   // Hours (if duration)
   if (cfg.duration) {
-    const hrs = document.createElement('div');
-    hrs.className = 'row';
-    hrs.innerHTML = `
-      <label for="hrs-${i}">Hours</label>
-      <input id="hrs-${i}" type="number" min="0" max="999" placeholder="e.g., 80" value="${s.hours}"/>`;
-    host.appendChild(hrs);
-    hrs.querySelector('#hrs-' + i).addEventListener('input', e => {
-      const v = e.target.value.replace(/[^0-9]/g, ''); s.hours = v.slice(0, 3);
-    });
-  }
+  const unitLabel = (s.main === 'D' || s.main === 'R') ? 'Days' : 'Hours';
+  const hrs = document.createElement('div');
+  hrs.className = 'row';
+  hrs.innerHTML = `
+    <label for="hrs-${i}">${unitLabel}</label>
+    <input id="hrs-${i}" type="number" min="0" max="999" placeholder="e.g., 80" value="${s.hours}"/>`;
+  host.appendChild(hrs);
+  hrs.querySelector('#hrs-' + i).addEventListener('input', e => {
+    const v = e.target.value.replace(/[^0-9]/g, ''); s.hours = v.slice(0, 3);
+  });
+}
+
 
   // Extras for Fermentation only
   if (s.main === 'F') {
