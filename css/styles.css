@@ -335,9 +335,9 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
 .split-2 .btn{
   display:block;        /* invece di inline-block */
   width:100%;
-  height:56px;          /* come Add step / Clear */
+  height:46px;          /* come Add step / Clear */
   font-weight:800;
-  font-size:18px;
+  font-size:16px;
   border-radius:14px;
   text-align:center;
 }
