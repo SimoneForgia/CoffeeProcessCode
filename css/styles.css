@@ -94,7 +94,8 @@ details summary::-webkit-details-marker{display:none}
 .step .handle{
   width:34px;height:46px;border:1px dashed var(--line);
   border-radius:10px;display:grid;place-items:center;
-  color:var(--fg);cursor:grab;user-select:none;touch-action:none
+  color:var(--fg);cursor:grab;user-select:none;touch-action:none;
+  background:#8f2a46
 }
 .step .handle:active{cursor:grabbing}
 
