@@ -63,3 +63,31 @@
 
 <script type="module" src="js/generator.js"></script>
 </body></html>
+
+<script>
+  const menu = document.getElementById('downloadMenu');
+  const btn  = document.getElementById('downloadBtn');
+  const linkPng = document.getElementById('dlPng');
+  const linkSvg = document.getElementById('dlSvg');
+
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    const open = menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  // Chiudi cliccando fuori o premendo ESC
+  document.addEventListener('click', e => {
+    if (!menu.contains(e.target)) {
+      menu.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      menu.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>
+
