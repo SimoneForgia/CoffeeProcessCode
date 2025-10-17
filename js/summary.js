@@ -32,38 +32,43 @@ function renderVerticalSummary(cpc){
     const right=document.createElement('div');
     const mainLabel=(CATALOG.find(x=>x.main===g.main)||{}).label || 'Unknown';
     right.appendChild(makeDetails(g.main, mainLabel, g.main));
+    
     if (g.sub) {
-  const li2 = document.createElement('li');
-  li2.className = 'sum-row';
-  const code2 = document.createElement('div');
-  code2.className = 'sum-code mono';
-  code2.textContent = g.sub;           // lettera della sottocategoria
-  li2.appendChild(code2);
-  const right2 = document.createElement('div');
-  right2.appendChild(makeDetails('S' + g.sub, SUB_LABELS[g.sub] || g.sub, 'S' + g.sub));
-  li2.appendChild(right2);
-  summaryEl.appendChild(li2);
-}
-    if (g.hours) {
-  const hrRow = document.createElement('div');
-  hrRow.style.marginTop = '6px';
-  hrRow.className = 'inline';
+  const liSub = document.createElement('li');
+  liSub.className = 'sum-row';
 
-  const code3 = document.createElement('div');
-  code3.className = 'sum-code mono';
-  code3.style.width = '40px';
-  code3.textContent = g.hours;
-  hrRow.appendChild(code3);
+  const subCode = document.createElement('div');
+  subCode.className = 'sum-code mono';
+  subCode.textContent = g.sub;          // lettera sub nella colonna sinistra
+  liSub.appendChild(subCode);
+
+  const subRight = document.createElement('div');
+  subRight.appendChild(makeDetails('S' + g.sub, SUB_LABELS[g.sub] || g.sub, 'S' + g.sub));
+  liSub.appendChild(subRight);
+
+  summaryEl.appendChild(liSub);          // <-- viene DOPO la riga main
+}
+
+    if (g.hours) {
+  const liTime = document.createElement('li');
+  liTime.className = 'sum-row';
+
+  const timeCode = document.createElement('div');
+  timeCode.className = 'sum-code mono';
+  timeCode.textContent = g.hours;             // numero allineato a sinistra (40px)
+  liTime.appendChild(timeCode);
 
   const n = parseInt(g.hours, 10);
   const isDays = (g.main === 'D' || g.main === 'R'); // Drying, Rest in parchment
   const unit = isDays ? 'day' : 'hour';
-  const label = document.createElement('div');
-  label.textContent = `${n} ${unit}${n === 1 ? '' : 's'}`;
-  hrRow.appendChild(label);
 
-  right.appendChild(hrRow);
+  const timeRight = document.createElement('div');
+  timeRight.textContent = `${n} ${unit}${n === 1 ? '' : 's'}`;
+  liTime.appendChild(timeRight);
+
+  summaryEl.appendChild(liTime);              // <-- dopo main (e dopo sub, se c'è)
 }
+
     row.appendChild(right); summaryEl.appendChild(row);
     if(idx<groups.length-1){
       const dot=document.createElement('li'); dot.className='sum-row';
