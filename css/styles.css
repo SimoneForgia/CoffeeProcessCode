@@ -318,8 +318,37 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
 }
 
 
-
 /* Pulsanti quadrati piccoli (se usi ancora .square in qualche punto) */
 .square{width:42px;min-width:42px;height:42px;display:grid;place-items:center;padding:0}
 .trash{width:18px;height:18px;fill:var(--fg);opacity:.9}
+
+
+/* Riga divisa in due colonne uguali */
+.split-2{
+  display:grid;
+  grid-template-columns:1fr 1fr; /* 50% | 50% */
+  gap:10px;
+  margin-top:8px;
+}
+
+/* Open link a tutta larghezza, stessa altezza dei bottoni grandi */
+.split-2 .btn{
+  display:block;        /* invece di inline-block */
+  width:100%;
+  height:56px;          /* come Add step / Clear */
+  font-weight:800;
+  font-size:18px;
+  border-radius:14px;
+  text-align:center;
+}
+
+/* Il menu occupa tutta la colonna e il trigger ha la stessa altezza */
+.split-2 .menu{ width:100%; }
+.split-2 .menu .menu-trigger{
+  width:100%;
+  height:56px;          /* stessa altezza */
+  font-weight:800;
+  font-size:18px;
+  border-radius:14px;
+}
 
