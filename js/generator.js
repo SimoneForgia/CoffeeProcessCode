@@ -127,7 +127,7 @@ function renderExtras(i, cfg, s) {
   hrs.className = 'row';
   hrs.innerHTML = `
     <label for="hrs-${i}">${unitLabel}</label>
-    <input id="hrs-${i}" type="number" min="0" max="999" placeholder="e.g., 80" value="${s.hours}"/>`;
+    <input id="hrs-${i}" type="number" min="0" max="999" placeholder="e.g., 24" value="${s.hours}"/>`;
   host.appendChild(hrs);
   hrs.querySelector('#hrs-' + i).addEventListener('input', e => {
     const v = e.target.value.replace(/[^0-9]/g, ''); s.hours = v.slice(0, 3);
