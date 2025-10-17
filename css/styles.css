@@ -65,12 +65,39 @@ details summary::-webkit-details-marker{display:none}
 .home-cta a:hover{background:var(--btnHover)}
 
 /* Step controls */
+/* Step controls — REPLACE */
 .step{position:relative}
-.step .close{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.18);display:grid;place-items:center;cursor:pointer}
+
+.step .close{
+  position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:8px;
+  border:1px solid var(--line);background:rgba(0,0,0,.18);display:grid;place-items:center;cursor:pointer
+}
 .step .close:hover{background:var(--btnHover)}
-.step .handle{position:relative;left:2px;top:8px;width:26px;height:26px;border:1px dashed var(--line);border-radius:8px;display:contents;place-items:center;cursor:grab;user-select:none}
+
+/* Riga con: numero | select | handle  */
+.step .inline{
+  display:grid;
+  grid-template-columns:auto 1fr 34px;  /* numero | select | maniglia */
+  align-items:center;
+  gap:10px;
+}
+
+/* Numero (forzo anche se l’HTML ha .mono senza .num) */
+.step .num, .step .mono{
+  height:46px;
+  display:flex;align-items:center;
+  padding:0 6px 0 2px !important; /* sovrascrive l’inline padding dell’Inspector */
+  font-weight:700;
+}
+
+/* Maniglia */
+.step .handle{
+  width:34px;height:46px;border:1px dashed var(--line);
+  border-radius:10px;display:grid;place-items:center;
+  color:var(--fg);cursor:grab;user-select:none;touch-action:none
+}
 .step .handle:active{cursor:grabbing}
-.step .num{font-weight:700;margin-left:44px} /* spazio per la handle */
+
 
 /* CPC row con icona copy integrata */
 .cpc-row{display:grid;grid-template-columns:20% 1fr;gap:12px;align-items:center}
@@ -111,7 +138,7 @@ label{font-weight:600;font-size:14px}
 .row{display:flex;flex-direction:column;gap:8px}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 select,input,button{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);
-  background:rgba(0,0,0,.18);color:var(--fg);font-size:16px}
+  background:rgba(0,0,0,.18);color:var(--fg);font-size:16px;height:46px}
 select{cursor:pointer}
 button{background:var(--btn);border:none;color:var(--fg);font-weight:700;cursor:pointer}
 button:hover{background:var(--btnHover)}
@@ -130,7 +157,7 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)
   color:var(--fg);cursor:grab;user-select:none;touch-action:none
 }
 .handle:active{cursor:grabbing}
-.dots{height:22px;opacity:.9;margin-top: -12px;}
+.dots{height:22px;opacity:.9;margin-top:0;}
 
 /* X compatta in alto-destra */
 .xbtn{
