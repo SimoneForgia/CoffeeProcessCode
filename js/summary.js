@@ -36,7 +36,26 @@ function renderVerticalSummary(cpc){
   groups.forEach((g, idx) => {
     const frag = document.createDocumentFragment();
 
-    // --- MAIN ROW (sempre per prima) ---
+    // --- HEADER "Step 1" PRIMA DELLA PRIMA CATEGORIA ---
+    if (idx === 0) {
+      const liStepHdr = document.createElement('li');
+      liStepHdr.className = 'sum-row';
+
+      // colonna sinistra vuota (40px)
+      const leftBlank = document.createElement('div');
+      leftBlank.className = 'sum-code mono';
+      leftBlank.textContent = '';  // solo spazio di allineamento
+      liStepHdr.appendChild(leftBlank);
+
+      // colonna destra "Step 1" in grassetto
+      const rightHdr = document.createElement('div');
+      rightHdr.innerHTML = '<b>Step 1</b>';
+      liStepHdr.appendChild(rightHdr);
+
+      frag.appendChild(liStepHdr);
+    }
+
+    // --- MAIN ROW ---
     const liMain = document.createElement('li');
     liMain.className = 'sum-row';
 
@@ -76,7 +95,7 @@ function renderVerticalSummary(cpc){
 
       const codeTime = document.createElement('div');
       codeTime.className = 'sum-code mono';
-      codeTime.textContent = g.hours;  // numero allineato nella colonna da 40px
+      codeTime.textContent = g.hours;
       liTime.appendChild(codeTime);
 
       const n = parseInt(g.hours, 10);
@@ -90,7 +109,7 @@ function renderVerticalSummary(cpc){
       frag.appendChild(liTime);
     }
 
-    // --- SEPARATORE (pallino) tra gruppi ---
+    // --- SEPARATORE con "Step N+1" nella cella destra ---
     if (idx < groups.length - 1) {
       const liDot = document.createElement('li');
       liDot.className = 'sum-row';
@@ -101,16 +120,16 @@ function renderVerticalSummary(cpc){
       liDot.appendChild(codeDot);
 
       const rightDot = document.createElement('div');
-      rightDot.textContent = '';
+      rightDot.innerHTML = `<b>Step ${idx + 2}</b>`;
       liDot.appendChild(rightDot);
 
       frag.appendChild(liDot);
     }
 
-    // Append tutto insieme, nell'ordine corretto
     summaryEl.appendChild(frag);
   });
 }
+
 
 
 (function(){
