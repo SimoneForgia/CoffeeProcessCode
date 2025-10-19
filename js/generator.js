@@ -40,8 +40,10 @@ function tokenForStep(s) {
   if (!s || !s.main) return '';
   const hrs = (s.hours !== '' && /^\d{1,3}$/.test(String(s.hours)))
     ? String(parseInt(s.hours, 10)) : '';
-  return `${s.main}${s.sub || ''}${hrs}`;
+  const u = (hrs && (s.unit==='h' || s.unit==='d')) ? s.unit : '';
+  return `${s.main}${s.sub || ''}${hrs}${u}`;
 }
+
 function buildCPC() { return steps.map(tokenForStep).filter(Boolean).join('.'); }
 function buildOpt() { return _buildOpt(steps); }
 
@@ -102,27 +104,19 @@ card.querySelector('#sel-'+i).addEventListener('change', e=>{
   const main = e.target.value;
   const cfg = CATALOG.find(x=>x.main===main) || {duration:false,extras:false,sub:[]};
 
-  // NON perdere l'unità scelta dall'utente se già presente
-  const prevUnit = s.unit;
-
-  // reset base
   s.main = main;
   s.sub = '';
   s.hours = '';
+  if (!s.unit) s.unit = 'h';                 // ← se assente, default “h” (nessuna eccezione)
   s.mucilagePct = '';
-
-  // reset extras
   s.extras = {
     container:'', addition:'', additionKind:'', thermal:'no', temp:'', ph:'',
     contactDuringDrying:'', contactKind:''
   };
 
-  // Se la nuova categoria ha durata, inizializza unit solo se non esiste già: default 'h'
-  s.unit = cfg.duration ? (prevUnit || 'h') : '';
-
-  renderExtras(i, cfg, s);
-  setRail();
+  renderExtras(i, cfg, s); setRail();
 });
+
 
 
   // drag (mouse + touch) via Pointer Events
@@ -168,40 +162,49 @@ function renderExtras(i, cfg, s) {
     pct.querySelector('#pct-'+i).addEventListener('change', e => { s.mucilagePct = e.target.value; });
   }
 
-  // 3) Time (se prevista) + toggle h/d
+  // 3) Time + iOS toggle (se previsto)
 if (cfg.duration) {
-  if (!s.unit) s.unit = 'h'; // solo se vuota, nessuna eccezione per categoria
+  if (!s.unit) s.unit = 'h';   // sicurezza
 
-  const hrs = document.createElement('div');
-  hrs.className = 'row';
-  hrs.innerHTML = `
+  const time = document.createElement('div');
+  time.className = 'row';
+  time.innerHTML = `
     <label for="hrs-${i}">Time</label>
-    <div class="inline">
+    <div class="time-field">
       <input id="hrs-${i}" type="number" min="0" max="999"
-             placeholder="e.g., ${s.unit==='d'?'3':'24'}" value="${s.hours}"/>
-      <div class="unit-toggle" role="group" aria-label="Unit">
-        <button type="button" class="unit-btn ghost ${s.unit==='h'?'active':''}" data-u="h">h</button>
-        <button type="button" class="unit-btn ghost ${s.unit==='d'?'active':''}" data-u="d">d</button>
-      </div>
+             placeholder="e.g., ${s.unit==='d' ? '3' : '24'}"
+             value="${s.hours}"/>
+      <button type="button"
+              class="ios-switch ${s.unit==='d'?'on':''}"
+              aria-pressed="${s.unit==='d'?'true':'false'}"
+              title="Toggle hours/days">
+        <span class="knob"></span>
+      </button>
+      <span class="unit-chip">${s.unit}</span>
     </div>`;
+  host.appendChild(time);
 
-  host.appendChild(hrs);
-
-  // aggiorna numero
-  hrs.querySelector('#hrs-' + i).addEventListener('input', e => {
-    const v = e.target.value.replace(/[^0-9]/g, '');
-    s.hours = v.slice(0, 3);
+  // input listener
+  time.querySelector('#hrs-'+i).addEventListener('input', e=>{
+    const v = e.target.value.replace(/[^0-9]/g,'');
+    s.hours = v.slice(0,3);
   });
 
-  // toggle unità
-  hrs.querySelectorAll('.unit-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      s.unit = btn.dataset.u; // 'h' | 'd'
-      hrs.querySelectorAll('.unit-btn').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-    });
+  // toggle listener
+  const sw = time.querySelector('.ios-switch');
+  const chip = time.querySelector('.unit-chip');
+  sw.addEventListener('click', ()=>{
+    const on = !sw.classList.contains('on');
+    sw.classList.toggle('on', on);
+    sw.setAttribute('aria-pressed', on ? 'true' : 'false');
+    s.unit = on ? 'd' : 'h';
+    chip.textContent = s.unit;
+    // aggiorna placeholder sensato
+    const inp = time.querySelector('#hrs-'+i);
+    if (!inp.value) inp.placeholder = `e.g., ${s.unit==='d' ? '3' : '24'}`;
   });
 }
+
 
 
   // 4) Fermentation → extra campi
@@ -573,8 +576,8 @@ document.getElementById('dlSvg')?.addEventListener('click', async (e)=>{ e.preve
     const m = tok.match(/^([A-Z])([A-Z]?)(\d{1,3})?([hd])?$/);
     if (!m) return blankStep();
     const [, L, S, H, U] = m;
-    return { main: L, sub: S || '', hours: H || '', unit: U || ((L==='D'||L==='R')?'d':'h'), extras: { temp: '', ph: '' } };
-  });
+    return { main: L, sub: S || '', hours: H || '', unit: U || 'h', extras: { temp: '', ph: '' } };
+    });
   if (steps.length < 2) steps = [blankStep(), blankStep()];
   refreshAndRail();
 })();
