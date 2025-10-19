@@ -167,6 +167,26 @@ function renderExtras(i, cfg, s) {
   // 4) Fermentation → extra campi
   if (s.main === 'F') {
     // Container + Temperature + Addition + (Addition kind*) + Thermal shock
+    
+    const temp = document.createElement('div');
+    temp.className = 'row';
+    temp.innerHTML = `
+      <label for="temp-${i}">Temperature (°C)</label>
+      <input id="temp-${i}" type="text" placeholder="e.g., 18" value="${s.extras.temp || ''}"/>`;
+    host.appendChild(temp);
+    temp.querySelector('#temp-'+i).addEventListener('input', e => { s.extras.temp = e.target.value.trim(); });
+    
+    const thermal = document.createElement('div');
+    thermal.className = 'row';
+    thermal.innerHTML = `
+      <label for="th-${i}">Thermal shock</label>
+      <select id="th-${i}">
+        <option value="yes" ${s.extras.thermal==='yes'?'selected':''}>Yes</option>
+        <option value="no"  ${s.extras.thermal==='no'?'selected':''}>No</option>
+      </select>`;
+    host.appendChild(thermal);
+    thermal.querySelector('#th-'+i).addEventListener('change', e => { s.extras.thermal = e.target.value; });
+    
     const cont = document.createElement('div');
     cont.className = 'row';
     cont.innerHTML = `
@@ -184,14 +204,6 @@ function renderExtras(i, cfg, s) {
       </select>`;
     host.appendChild(cont);
     cont.querySelector('#ct-'+i).addEventListener('change', e => { s.extras.container = e.target.value; });
-
-    const temp = document.createElement('div');
-    temp.className = 'row';
-    temp.innerHTML = `
-      <label for="temp-${i}">Temperature (°C)</label>
-      <input id="temp-${i}" type="text" placeholder="e.g., 18" value="${s.extras.temp || ''}"/>`;
-    host.appendChild(temp);
-    temp.querySelector('#temp-'+i).addEventListener('input', e => { s.extras.temp = e.target.value.trim(); });
 
     const add = document.createElement('div');
     add.className = 'row';
@@ -224,17 +236,6 @@ function renderExtras(i, cfg, s) {
       if (!need) s.extras.additionKind = '';
     }
     toggleAddKind();
-
-    const thermal = document.createElement('div');
-    thermal.className = 'row';
-    thermal.innerHTML = `
-      <label for="th-${i}">Thermal shock</label>
-      <select id="th-${i}">
-        <option value="yes" ${s.extras.thermal==='yes'?'selected':''}>Yes</option>
-        <option value="no"  ${s.extras.thermal==='no'?'selected':''}>No</option>
-      </select>`;
-    host.appendChild(thermal);
-    thermal.querySelector('#th-'+i).addEventListener('change', e => { s.extras.thermal = e.target.value; });
   }
 
   // 5) Drying → domanda contatto + kind se yes
