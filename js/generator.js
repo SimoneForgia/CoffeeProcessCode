@@ -36,6 +36,18 @@ window.addEventListener('load', setRail);
 let steps = [blankStep(), blankStep()];
 
 /* ------- Helpers ------- */
+
+/* Evidenziazione campi mancanti */
+function flagMissing(selector, scope=document){
+  const el = scope.querySelector(selector);
+  if (!el) return;
+  el.classList.add('is-missing');
+  el.closest('.row')?.classList.add('is-missing');
+}
+function clearMissing(){
+  document.querySelectorAll('.is-missing').forEach(n=> n.classList.remove('is-missing'));
+}
+
 function tokenForStep(s) {
   if (!s || !s.main) return '';
   const hrs = (s.hours !== '' && /^\d{1,3}$/.test(String(s.hours)))
@@ -135,7 +147,7 @@ function renderExtras(i, cfg, s) {
     const sub = document.createElement('div');
     sub.className = 'row';
     sub.innerHTML = `
-      <label for="sub-${i}">Subtype</label>
+      <label for="sub-${i}">Subtype${s.main==='W' ? ' (optional)' : ''}</label>
       <select id="sub-${i}">
         <option value="">Select an option</option>
         ${cfg.sub.map(k => {
@@ -153,7 +165,7 @@ function renderExtras(i, cfg, s) {
     const pct = document.createElement('div');
     pct.className = 'row';
     pct.innerHTML = `
-      <label for="pct-${i}">Mucilage left</label>
+      <label for="pct-${i}">Mucilage left (optional)</label>
       <select id="pct-${i}">
         <option value="">Select an option</option>
         ${[10,25,50,75].map(v => `<option value="${v}" ${s.mucilagePct==v?'selected':''}>${v}%</option>`).join('')}
@@ -169,7 +181,7 @@ if (cfg.duration) {
   const time = document.createElement('div');
   time.className = 'row';
   time.innerHTML = `
-    <label for="hrs-${i}">Time</label>
+    <label for="hrs-${i}">Time${s.main==='D' ? ' (optional)' : ''}</label>
     <div class="time-field">
       <input id="hrs-${i}" type="number" min="0" max="999"
              placeholder="e.g., ${s.unit==='d' ? '3' : '24'}"
@@ -215,7 +227,7 @@ const temp = document.createElement('div');
 temp.className = 'row';
 if (!s.extras.unitTemp) s.extras.unitTemp = 'C'; // default
 temp.innerHTML = `
-  <label for="temp-${i}">Temperature</label>
+  <label for="temp-${i}">Temperature (optional)</label>
   <div class="time-field">
     <input id="temp-${i}" type="number" placeholder="e.g., ${s.extras.unitTemp==='F' ? '64' : '18'}" value="${s.extras.temp || ''}"/>
     <button type="button"
@@ -261,7 +273,7 @@ swT.addEventListener('click', () => {
     const cont = document.createElement('div');
     cont.className = 'row';
     cont.innerHTML = `
-      <label for="ct-${i}">Container</label>
+      <label for="ct-${i}">Container (optional)</label>
       <select id="ct-${i}">
         ${['','plastic','wood','metal','concrete','clay'].map(v=>{
           const label = v===''?'Select an option':
@@ -519,6 +531,7 @@ $('#clearAll').addEventListener('click', () => {
 
 // Generate
 $('#gen')?.addEventListener('click', async () => {
+  clearMissing();
   // passi minimi: almeno 2 step selezionati
   const filled = steps.filter(s => s.main);
   if (filled.length < 2) {
@@ -527,49 +540,52 @@ $('#gen')?.addEventListener('click', async () => {
   }
 
   // validazioni per durata + campi opzionali che puoi voler rendere obbligatori
-  for (const s of filled) {
-    const cfg = CATALOG.find(x => x.main === s.main);
+    let hasErr = false;
 
-    // Durata obbligatoria dove previsto (Hours/Days a seconda dello step)
-    if (cfg && cfg.duration) {
+  for (const [idx, s] of filled.entries()) {
+    const cfg = CATALOG.find(x => x.main === s.main) || {};
+
+    // 1) Durata obbligatoria dove previsto, MA NON per Drying (D) che è opzionale
+    if (cfg.duration && s.main !== 'D') {
       const v = String(s.hours ?? '').trim();
-      if (!/^\d{1,3}$/.test(v)) {
-        hint.textContent = 'Please fill duration where required.';
-        return;
+      const ok = /^\d{1,3}$/.test(v);
+      if (!ok) {
+        // evidenzia l'input "Time" di questo step
+        flagMissing(`#hrs-${steps.indexOf(s)}`);
+        hasErr = true;
       }
     }
 
-    // Depulping: se vuoi forzare la % di mucillagine (opzionale, lascia commentato)
-    // if (s.main === 'P') {
-    //   const ex = s.extras || {};
-    //   if (ex.requireMucilagePct && (ex.mucilagePct === '' || ex.mucilagePct == null)) {
-    //     hint.textContent = 'Please select mucilage left %.';
-    //     return;
-    //   }
-    // }
-
-    // Fermentation: se si seleziona un’aggiunta “descrittiva”, va specificato cosa
+    // 2) Fermentation: se si seleziona un’aggiunta “descrittiva”, va specificato cosa
     if (s.main === 'F') {
       const ex = s.extras || {};
-      const needsKind = ['fruits', 'herbs', 'spices', 'flowers', 'essential', 'other']
-        .includes(ex.addition);
+      const needsKind = ['fruits','herbs','spices','flowers','essential','other'].includes(ex.addition);
       if (needsKind && !(ex.additionKind && ex.additionKind.trim())) {
-        hint.textContent = 'Please specify what was added during fermentation.';
-        return;
+        flagMissing(`#addk-${steps.indexOf(s)}`);
+        hasErr = true;
       }
+      // NOTE: Temperature e Container sono opzionali → nessuna forzatura
     }
 
-    // Drying: se è stato indicato contatto con un prodotto, va specificato quale
+    // 3) Drying: se “contactDuringDrying = yes”, richiedi il kind
     if (s.main === 'D') {
       const ex = s.extras || {};
       if (ex.contactDuringDrying === 'yes' && !(ex.contactKind && ex.contactKind.trim())) {
-        hint.textContent = 'Please specify the product put in contact during drying.';
-        return;
+        flagMissing(`#cdk-${steps.indexOf(s)}`);
+        hasErr = true;
       }
+      // NOTE: Time opzionale → nessuna forzatura su #hrs-*
     }
 
-    // Rest: nessuna validazione extra oltre alla durata
+    // 4) Washing: Subtype opzionale → nessuna forzatura (#sub-*)
+    // 5) Depulping: Mucilage left opzionale → nessuna forzatura (#pct-*)
   }
+
+  if (hasErr) {
+    hint.textContent = 'Please fill the required fields (highlighted).';
+    return;
+  }
+
 
   // ok: genera CPC e aggiorna UI
   const cpc = buildCPC();
