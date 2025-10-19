@@ -181,8 +181,8 @@ function renderExtras(i, cfg, s) {
     thermal.innerHTML = `
       <label for="th-${i}">Thermal shock</label>
       <select id="th-${i}">
-        <option value="yes" ${s.extras.thermal==='yes'?'selected':''}>Yes</option>
         <option value="no"  ${s.extras.thermal==='no'?'selected':''}>No</option>
+        <option value="yes" ${s.extras.thermal==='yes'?'selected':''}>Yes</option>
       </select>`;
     host.appendChild(thermal);
     thermal.querySelector('#th-'+i).addEventListener('change', e => { s.extras.thermal = e.target.value; });
