@@ -130,7 +130,11 @@ function renderExtras(i, cfg, s) {
       <label for="sub-${i}">Subtype</label>
       <select id="sub-${i}">
         <option value="">Select an option</option>
-        ${cfg.sub.map(k => `<option value="${k}" ${s.sub === k ? 'selected' : ''}>${SUB_LABELS[k]}</option>`).join('')}
+        ${cfg.sub.map(k => {
+        const key = (s.main || '') + k;            // es. 'F' + 'A' => 'FA'
+        const label = SUB_LABELS[key] || SUB_LABELS[k] || k;
+        return `<option value="${k}" ${s.sub === k ? 'selected' : ''}>${label}</option>`;
+        }).join('')}
       </select>`;
     host.appendChild(sub);
     sub.querySelector('#sub-' + i).addEventListener('change', e => { s.sub = e.target.value; });
