@@ -162,9 +162,9 @@ function renderExtras(i, cfg, s) {
     pct.querySelector('#pct-'+i).addEventListener('change', e => { s.mucilagePct = e.target.value; });
   }
 
-  // 3) Time + iOS toggle (se previsto)
+  // 3) Time + iOS toggle (hours/days) dentro al campo
 if (cfg.duration) {
-  if (!s.unit) s.unit = 'h';   // sicurezza
+  if (!s.unit) s.unit = 'h';   // di sicurezza
 
   const time = document.createElement('div');
   time.className = 'row';
@@ -178,32 +178,31 @@ if (cfg.duration) {
               class="ios-switch ${s.unit==='d'?'on':''}"
               aria-pressed="${s.unit==='d'?'true':'false'}"
               title="Toggle hours/days">
-        <span class="knob"></span>
+        <span class="label hours">hours</span>
+        <span class="label days">days</span>
+        <span class="thumb"></span>
       </button>
-      <span class="unit-chip">${s.unit}</span>
     </div>`;
   host.appendChild(time);
 
-  // input listener
+  // input
   time.querySelector('#hrs-'+i).addEventListener('input', e=>{
     const v = e.target.value.replace(/[^0-9]/g,'');
     s.hours = v.slice(0,3);
   });
 
-  // toggle listener
+  // toggle
   const sw = time.querySelector('.ios-switch');
-  const chip = time.querySelector('.unit-chip');
+  const inp = time.querySelector('#hrs-'+i);
   sw.addEventListener('click', ()=>{
     const on = !sw.classList.contains('on');
     sw.classList.toggle('on', on);
     sw.setAttribute('aria-pressed', on ? 'true' : 'false');
     s.unit = on ? 'd' : 'h';
-    chip.textContent = s.unit;
-    // aggiorna placeholder sensato
-    const inp = time.querySelector('#hrs-'+i);
     if (!inp.value) inp.placeholder = `e.g., ${s.unit==='d' ? '3' : '24'}`;
   });
 }
+
 
 
 
