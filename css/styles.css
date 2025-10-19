@@ -390,11 +390,11 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
 }
 
 
-/* Time field: input con toggle dentro a destra */
+/* Time field: input con toggle lungo a destra */
 .time-field{ position:relative; }
 .time-field input{
   width:100%;
-  padding-right:180px;            /* spazio per toggle lungo */
+  padding-right:180px;                 /* spazio per il toggle */
 }
 
 /* Toggle iOS con etichette "hours" / "days" */
@@ -402,42 +402,46 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
   position:absolute;
   top:50%; right:8px;
   transform:translateY(-50%);
-  width:150px;                    /* lungo */
+  width:150px;
   height:34px;
   border:1px solid var(--line);
   border-radius:999px;
   background:rgba(255,255,255,.08);
   color:var(--fg);
   cursor:pointer;
-  padding:0;
-  outline:none;
   display:inline-block;
   overflow:hidden;
+
+  /* 💡 padding crea il “canale” e permette al thumb di avere angoli tondi su entrambi i lati */
+  padding:4px;
 }
 
-/* placca rosa chiaro che scorre sotto al testo (metà larghezza) */
+/* placca rosa chiaro che scorre: più stretta della metà e con bordi totalmente arrotondati */
 .ios-switch .thumb{
   position:absolute;
-  top:0; left:0;
-  width:50%; height:100%;
-  background:rgba(255,213,225,.5);          /* ≈ rosa chiaro (come “Clear”) */
-  border-right:1px solid rgba(0,0,0,.06);
+  top:4px;
+  left:4px;
+  width:calc(50% - 8px);               /* metà meno il padding dx/sx */
+  height:calc(100% - 8px);             /* piena altezza meno padding top/bottom */
+  border-radius:999px;                  /* arrotondata su tutti i lati */
+  background:#e63e62;      /* rosa chiaro (come Clear) */
   transition:left .18s ease;
+  z-index: -1;
 }
-.ios-switch.on .thumb{ left:50%; }
+.ios-switch.on .thumb{
+  left:calc(50% + 4px);                 /* metà + padding = lato destro */
+}
 
-/* etichette */
+/* etichette dentro la pillola */
 .ios-switch .label{
   position:absolute;
   top:0; width:50%; height:100%;
   display:flex; align-items:center; justify-content:center;
   font-weight:700; font-size:14px;
-  pointer-events:none;            /* clic passa sempre al bottone */
+  pointer-events:none;
+  opacity:.85;
 }
 .ios-switch .label.hours{ left:0; }
 .ios-switch .label.days { left:50%; }
-
-/* stato attivo: testo un filo più evidente sopra la placca */
-.ios-switch .label{ opacity:.9; }
 .ios-switch:not(.on) .label.hours{ opacity:1; }
 .ios-switch.on .label.days{ opacity:1; }
