@@ -495,21 +495,40 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
 
 
 /* --- CPC: campi richiesti mancanti --- */
+/* ——— Evidenziazione UNIFORME, senza gradient ——— */
 .time-field.is-missing,
 select.is-missing,
 input.is-missing {
-  background: #e63e62 !important;        /* un filo più chiaro */
-  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.15);
+  background: #e63e62 !important;                  /* tinta piena */
+  background-image: none !important;               /* niente gradient */
+  -webkit-appearance: none !important;             /* safari/ios select/input */
+  appearance: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  mix-blend-mode: normal !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.25) !important;
+  background-clip: padding-box !important;
+  border-radius: 12px;                              /* segue la forma */
   transition: background .2s ease, box-shadow .2s ease;
-  border-radius: 12px;
 }
 
-/* Uniforma il colore anche nei select con background personalizzato */
-select.is-missing {
+/* Se il tema disegna effetti via pseudo-elementi sul wrapper */
+.time-field.is-missing::before,
+.time-field.is-missing::after {
+  content: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  opacity: 0 !important;
+}
+
+/* Alcuni temi applicano gradient al <select> interno del wrapper */
+.time-field.is-missing select,
+.time-field.is-missing input {
+  background: transparent !important;              /* lascia il wrapper colorare */
   background-image: none !important;
+  box-shadow: none !important;
 }
-
-/* Non toccare i label */
-.row.is-missing label { opacity: 1; }  /* non serve più, ma in caso */
 
 
