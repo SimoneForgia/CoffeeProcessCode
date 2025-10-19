@@ -12,7 +12,7 @@ export const CATALOG = [
   { main:'D', label:'Drying',        duration:true,  extras:true,  sub:['R','P','M'] },
   // R=Raised beds, P=Patio, M=Mechanical (+ domanda contatto durante l’asciugatura)
 
-  { main:'R', label:'Rest',          duration:true,  extras:false, sub:['C','P'] },
+  { main:'R', label:'Resting',          duration:true,  extras:false, sub:['C','P'] },
   // C=In cherries (Hours), P=In parchment (Days)
 
   { main:'H', label:'Hulling',       duration:false, extras:false, sub:['W','D'] }
@@ -23,20 +23,21 @@ export const SUB_LABELS = {
   // Fermentation
   A:'Aerobic',
   N:'Anaerobic',
-  C:'Carbonic (F) / Cherries (R)', // C è "Carbonic" in F e "Cherries" in R
+  C:'Carbonic maceration',
   I:'Immersion',
 
   // Washing
-  M:'Mechanical demucilagers (W) / Mechanical (D)',
-  K:'Kenyan process',
-  R:'Rinsed (W) / Raised (D)',
+  M:'With mechanical demucilagers',
+  K:'Manually with the Kenyan process',
+  R:'Only rinsed with water',
 
   // Drying
-  P:'Patio / Parchment (R)',       // P è "Patio" in D e "Parchment" in R
+  P:'In parchment',
+  C: 'In cherries',
 
-  // Rest
-  W:'Wet (H)',
-  D:'Dry (H)'
+  // Hulling
+  W:'Wet',
+  D:'Dry'
 };
 
 export const DESCRIPTIONS = {
@@ -46,7 +47,7 @@ export const DESCRIPTIONS = {
   F:'Controlled microbial activity that transforms mucilage and impacts flavor.',
   W:'Washing stage to remove mucilage and/or finish fermentation.',
   D:'Reduction of moisture to safe storage levels on patios, raised beds or machines.',
-  R:'Conditioning period before/after hulling.',
+  R:'Resting period usually due to transportation or processing logistics.',
   H:'Removal of parchment (dry) or wet-hulling style.',
 
   /* --- Fermentation (F + sub) --- */
@@ -57,7 +58,7 @@ export const DESCRIPTIONS = {
 
   /* --- Washing (W + sub) --- */
   WM:'Mucilage removed using mechanical demucilagers.',
-  WK:'Manual wash using the Kenyan process (double ferment/soak).',
+  WK:'Manual wash using the Kenyan process.',
   WR:'Only rinsed with water, minimal mechanical/microbial action.',
 
   /* --- Drying (D + sub) --- */
@@ -65,9 +66,9 @@ export const DESCRIPTIONS = {
   DP:'Dried on patios (concrete/tiles).',
   DM:'Dried using assisted/mechanical dryers.',
 
-  /* --- Rest (R + sub) --- */
+  /* --- Resting (R + sub) --- */
   RC:'Rest in cherries (typically measured in hours).',
-  RP:'Rest/conditioning in parchment (typically measured in days).',
+  RP:'Rest/conditioning in parchment to uniform humidity.',
 
   /* --- Hulling (H + sub) --- */
   HW:'Wet hulling.',
