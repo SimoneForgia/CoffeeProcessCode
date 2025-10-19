@@ -247,7 +247,7 @@ function renderExtras(i, cfg, s) {
     const c = document.createElement('div');
     c.className = 'row';
     c.innerHTML = `
-      <label for="cd-${i}">Were the beans put into contact with any other product during drying?</label>
+      <label for="cd-${i}">Were the beans in contact with other products while drying?</label>
       <select id="cd-${i}">
         <option value="">Select an option</option>
         <option value="no"  ${s.extras.contactDuringDrying==='no'?'selected':''}>No</option>
