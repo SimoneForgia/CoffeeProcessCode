@@ -101,13 +101,27 @@ function buildStepBlock(i){
 card.querySelector('#sel-'+i).addEventListener('change', e=>{
   const main = e.target.value;
   const cfg = CATALOG.find(x=>x.main===main) || {duration:false,extras:false,sub:[]};
-  s.main = main; s.sub = ''; s.hours='';
-  s.mucilagePct=''; 
-  s.extras={
+
+  // NON perdere l'unità scelta dall'utente se già presente
+  const prevUnit = s.unit;
+
+  // reset base
+  s.main = main;
+  s.sub = '';
+  s.hours = '';
+  s.mucilagePct = '';
+
+  // reset extras
+  s.extras = {
     container:'', addition:'', additionKind:'', thermal:'no', temp:'', ph:'',
     contactDuringDrying:'', contactKind:''
   };
-  renderExtras(i, cfg, s); setRail();
+
+  // Se la nuova categoria ha durata, inizializza unit solo se non esiste già: default 'h'
+  s.unit = cfg.duration ? (prevUnit || 'h') : '';
+
+  renderExtras(i, cfg, s);
+  setRail();
 });
 
 
@@ -154,19 +168,41 @@ function renderExtras(i, cfg, s) {
     pct.querySelector('#pct-'+i).addEventListener('change', e => { s.mucilagePct = e.target.value; });
   }
 
-  // 3) Durata (se prevista)
-  if (cfg.duration) {
-    const unitLabel = unitFor(s);
-    const hrs = document.createElement('div');
-    hrs.className = 'row';
-    hrs.innerHTML = `
-      <label for="hrs-${i}">${unitLabel}</label>
-      <input id="hrs-${i}" type="number" min="0" max="999" placeholder="e.g., ${unitLabel==='Days'?'10':'24'}" value="${s.hours}"/>`;
-    host.appendChild(hrs);
-    hrs.querySelector('#hrs-' + i).addEventListener('input', e => {
-      const v = e.target.value.replace(/[^0-9]/g, ''); s.hours = v.slice(0, 3);
+  // 3) Time (se prevista) + toggle h/d
+if (cfg.duration) {
+  if (!s.unit) s.unit = 'h'; // solo se vuota, nessuna eccezione per categoria
+
+  const hrs = document.createElement('div');
+  hrs.className = 'row';
+  hrs.innerHTML = `
+    <label for="hrs-${i}">Time</label>
+    <div class="inline">
+      <input id="hrs-${i}" type="number" min="0" max="999"
+             placeholder="e.g., ${s.unit==='d'?'3':'24'}" value="${s.hours}"/>
+      <div class="unit-toggle" role="group" aria-label="Unit">
+        <button type="button" class="unit-btn ghost ${s.unit==='h'?'active':''}" data-u="h">h</button>
+        <button type="button" class="unit-btn ghost ${s.unit==='d'?'active':''}" data-u="d">d</button>
+      </div>
+    </div>`;
+
+  host.appendChild(hrs);
+
+  // aggiorna numero
+  hrs.querySelector('#hrs-' + i).addEventListener('input', e => {
+    const v = e.target.value.replace(/[^0-9]/g, '');
+    s.hours = v.slice(0, 3);
+  });
+
+  // toggle unità
+  hrs.querySelectorAll('.unit-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      s.unit = btn.dataset.u; // 'h' | 'd'
+      hrs.querySelectorAll('.unit-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
     });
-  }
+  });
+}
+
 
   // 4) Fermentation → extra campi
   if (s.main === 'F') {
@@ -534,10 +570,10 @@ document.getElementById('dlSvg')?.addEventListener('click', async (e)=>{ e.preve
   const p = new URLSearchParams(location.search);
   const cpcQ = p.get('cpc'); if (!cpcQ) return;
   steps = cpcQ.split('.').filter(Boolean).map(tok => {
-    const m = tok.match(/^([A-Z])([A-Z]?)(\d{1,3})?$/);
+    const m = tok.match(/^([A-Z])([A-Z]?)(\d{1,3})?([hd])?$/);
     if (!m) return blankStep();
-    const [, L, S, H] = m;
-    return { main: L, sub: S || '', hours: H || '', extras: { temp: '', ph: '' } };
+    const [, L, S, H, U] = m;
+    return { main: L, sub: S || '', hours: H || '', unit: U || ((L==='D'||L==='R')?'d':'h'), extras: { temp: '', ph: '' } };
   });
   if (steps.length < 2) steps = [blankStep(), blankStep()];
   refreshAndRail();
