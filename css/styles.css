@@ -388,3 +388,9 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
   font-size:16px;
   border-radius:14px;
 }
+
+/* Toggle unità di misura */
+.unit-toggle{ display:inline-flex; gap:6px; margin-left:8px; }
+.unit-toggle .unit-btn{ height:38px; padding:0 10px; border-radius:10px; }
+.unit-toggle .unit-btn.active{ background:var(--btn); border-color:var(--btnHover); }
+
