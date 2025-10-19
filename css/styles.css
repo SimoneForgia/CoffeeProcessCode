@@ -406,7 +406,7 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
   height:34px;
   border:1px solid var(--line);
   border-radius:12px;
-  background:rgba(255,255,255,.08);
+  background:#6b1631;
   color:var(--fg);
   cursor:pointer;
   display:inline-block;
