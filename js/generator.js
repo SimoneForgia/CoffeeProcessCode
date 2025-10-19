@@ -211,12 +211,42 @@ if (cfg.duration) {
     // Container + Temperature + Addition + (Addition kind*) + Thermal shock
     
     const temp = document.createElement('div');
-    temp.className = 'row';
-    temp.innerHTML = `
-      <label for="temp-${i}">Temperature (°C)</label>
-      <input id="temp-${i}" type="text" placeholder="e.g., 18" value="${s.extras.temp || ''}"/>`;
-    host.appendChild(temp);
-    temp.querySelector('#temp-'+i).addEventListener('input', e => { s.extras.temp = e.target.value.trim(); });
+    // Temperature con toggle °C / °F
+const temp = document.createElement('div');
+temp.className = 'row';
+if (!s.extras.unitTemp) s.extras.unitTemp = 'C'; // default
+temp.innerHTML = `
+  <label for="temp-${i}">Temperature</label>
+  <div class="time-field">
+    <input id="temp-${i}" type="number" placeholder="e.g., ${s.extras.unitTemp==='F' ? '64' : '18'}" value="${s.extras.temp || ''}"/>
+    <button type="button"
+            class="ios-switch temp-switch ${s.extras.unitTemp==='F' ? 'on' : ''}"
+            aria-pressed="${s.extras.unitTemp==='F' ? 'true' : 'false'}"
+            title="Toggle °C/°F">
+      <span class="label hours">°C</span>
+      <span class="label days">°F</span>
+      <span class="thumb"></span>
+    </button>
+  </div>`;
+host.appendChild(temp);
+
+// input listener
+temp.querySelector('#temp-' + i).addEventListener('input', e => {
+  const v = e.target.value.replace(/[^0-9.,]/g, '');
+  s.extras.temp = v.trim();
+});
+
+// toggle listener
+const swT = temp.querySelector('.temp-switch');
+const inpT = temp.querySelector('#temp-' + i);
+swT.addEventListener('click', () => {
+  const on = !swT.classList.contains('on');
+  swT.classList.toggle('on', on);
+  swT.setAttribute('aria-pressed', on ? 'true' : 'false');
+  s.extras.unitTemp = on ? 'F' : 'C';
+  if (!inpT.value) inpT.placeholder = `e.g., ${s.extras.unitTemp==='F' ? '64' : '18'}`;
+});
+
     
     const thermal = document.createElement('div');
     thermal.className = 'row';
