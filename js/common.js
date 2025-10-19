@@ -32,6 +32,11 @@ export const SUB_LABELS = {
   R:'Only rinsed with water',
 
   // Drying
+  R:'Raised beds'
+  P:'Patio',
+  M:'Mechanical',
+  
+  // Resting
   P:'In parchment',
   C: 'In cherries',
 
