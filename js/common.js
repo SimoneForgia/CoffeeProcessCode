@@ -105,10 +105,11 @@ export const blankStep = () => ({
 
 
 export function tokenForStep(s){
-  if (!s || !s.main) return '';
-  const HRS = (s.hours!=='' && /^\d{1,3}$/.test(String(s.hours))) ? String(parseInt(s.hours,10)) : '';
-  const U   = (s.unit === 'h' || s.unit === 'd') ? s.unit : '';
-  return `${s.main}${s.sub||''}${HRS}${HRS ? U : ''}`;
+  if(!s || !s.main) return '';
+  const HRS = (s.hours!=='' && /^\d{1,3}$/.test(String(s.hours)))
+    ? String(parseInt(s.hours,10)) : '';
+  const U = (HRS && (s.unit==='h' || s.unit==='d')) ? s.unit : '';
+  return `${s.main}${s.sub||''}${HRS}${U}`; 
 }
 export function buildCPC(steps){ return steps.map(tokenForStep).filter(Boolean).join('.'); }
 export function safeB64Encode(obj){ return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
