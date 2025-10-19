@@ -21,23 +21,28 @@ export const CATALOG = [
 
 export const SUB_LABELS = {
   // Fermentation
-  A:'Aerobic',
-  N:'Anaerobic',
-  C:'Carbonic maceration',
-  I:'Immersion',
+  FA:'Aerobic',
+  FN:'Anaerobic',
+  FC:'Carbonic maceration',
+  FI:'Immersion',
 
   // Washing
-  M:'With mechanical demucilagers',
-  K:'Manually with the Kenyan process',
-  R:'Only rinsed with water',
+  WM:'With mechanical demucilagers',
+  WK:'Manually with the Kenyan process',
+  WR:'Only rinsed with water',
+
+  // Drying
+  SR:'Raised beds'
+  SP:'Patio',
+  SM:'Mechanical',
   
   // Resting
-  P:'In parchment',
-  C: 'In cherries',
+  RP:'In parchment',
+  RC: 'In cherries',
 
   // Hulling
-  W:'Wet',
-  D:'Dry'
+  HW:'Wet',
+  HD:'Dry'
 };
 
 export const DESCRIPTIONS = {
