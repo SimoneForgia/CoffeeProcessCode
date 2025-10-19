@@ -495,12 +495,16 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
 
 
 /* --- CPC: campi richiesti mancanti --- */
-.is-missing {
-  background: #f6f6f6 !important;   /* leggermente più chiaro */
-  outline: 1.5px solid rgba(0,0,0,.08);
-  transition: background .2s ease, outline .2s ease;
+.time-field.is-missing,
+select.is-missing,
+input.is-missing {
+  background: rgba(255,255,255,0.06);        /* un filo più chiaro */
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.15);
+  transition: background .2s ease, box-shadow .2s ease;
+  /* mantiene il border-radius già definito dal tema */
 }
-.row.is-missing label {
-  opacity: .8;
-}
+
+/* Non toccare i label */
+.row.is-missing label { opacity: 1; }  /* non serve più, ma in caso */
+
 
