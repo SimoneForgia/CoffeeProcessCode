@@ -5,9 +5,9 @@ const summaryEl = $('#summary');
 function parseCPC(cpc){
   if(!cpc) return [];
   return cpc.split('.').filter(Boolean).map(tok=>{
-    const m = tok.match(/^([A-Z])([A-Z]?)(\d{0,3})$/);
-    if(!m) return {raw:tok, main:'?', sub:'', hours:''};
-    return {raw:tok, main:m[1], sub:m[2]||'', hours:m[3]||''};
+    const m = tok.match(/^([A-Z])([A-Z]?)(\d{0,3})?([hd])?$/);
+    if(!m) return {raw:tok, main:'?', sub:'', hours:'', unit:''};
+    return {raw:tok, main:m[1], sub:m[2]||'', hours:m[3]||'', unit:m[4]||''};
   });
 }
 function makeDetails(titleKey, titleText, descKey){
@@ -92,24 +92,25 @@ function renderVerticalSummary(cpc){
 
     // --- TIME ROW (se presente) ---
     if (g.hours) {
-      const liTime = document.createElement('li');
-      liTime.className = 'sum-row';
+  const liTime = document.createElement('li');
+  liTime.className = 'sum-row';
 
-      const codeTime = document.createElement('div');
-      codeTime.className = 'sum-code mono';
-      codeTime.textContent = g.hours;
-      liTime.appendChild(codeTime);
+  const codeTime = document.createElement('div');
+  codeTime.className = 'sum-code mono';
+  codeTime.textContent = g.hours;
+  liTime.appendChild(codeTime);
 
-      const n = parseInt(g.hours, 10);
-      const isDays = (g.main === 'D' || g.main === 'R'); // Drying / Rest in parchment
-      const unit = isDays ? 'day' : 'hour';
+  const n = parseInt(g.hours, 10);
+  const unitChar = (g.unit === 'd' || g.unit === 'h') ? g.unit : ((g.main==='D'||g.main==='R') ? 'd' : 'h');
+  const unitWord = unitChar === 'd' ? 'day' : 'hour';
 
-      const rightTime = document.createElement('div');
-      rightTime.textContent = `${n} ${unit}${n === 1 ? '' : 's'}`;
-      liTime.appendChild(rightTime);
+  const rightTime = document.createElement('div');
+  rightTime.textContent = `${n} ${unitWord}${n === 1 ? '' : 's'}`;
+  liTime.appendChild(rightTime);
 
-      frag.appendChild(liTime);
-    }
+  frag.appendChild(liTime);
+}
+
 
     // --- SEPARATORE con "Step N+1" nella cella destra ---
     if (idx < groups.length - 1) {
