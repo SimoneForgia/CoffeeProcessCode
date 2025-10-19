@@ -85,7 +85,7 @@ export const $ = (s, root=document) => root.querySelector(s);
 export const $$ = (s, root=document) => [...root.querySelectorAll(s)];
 
 export const blankStep = () => ({
-  main:'', sub:'', hours:'',
+  main:'', sub:'', hours:'', unit:'',
   // campi extra opzionali
   mucilagePct:'',              // Depulping: 10|25|50|75
   extras:{
@@ -105,9 +105,10 @@ export const blankStep = () => ({
 
 
 export function tokenForStep(s){
-  if(!s || !s.main) return '';
+  if (!s || !s.main) return '';
   const HRS = (s.hours!=='' && /^\d{1,3}$/.test(String(s.hours))) ? String(parseInt(s.hours,10)) : '';
-  return `${s.main}${s.sub||''}${HRS}`;
+  const U   = (s.unit === 'h' || s.unit === 'd') ? s.unit : '';
+  return `${s.main}${s.sub||''}${HRS}${HRS ? U : ''}`;
 }
 export function buildCPC(steps){ return steps.map(tokenForStep).filter(Boolean).join('.'); }
 export function safeB64Encode(obj){ return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
