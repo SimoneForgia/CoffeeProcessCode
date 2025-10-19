@@ -389,8 +389,51 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
   border-radius:14px;
 }
 
-/* Toggle unità di misura */
-.unit-toggle{ display:inline-flex; gap:6px; margin-left:8px; }
-.unit-toggle .unit-btn{ height:38px; padding:0 10px; border-radius:10px; }
-.unit-toggle .unit-btn.active{ background:var(--btn); border-color:var(--btnHover); }
+
+/* Time field with iOS-like switch inside */
+.time-field{ position:relative; }
+.time-field input{
+  width:100%;
+  padding-right:96px;                 /* spazio per lo switch e la chip */
+}
+
+.ios-switch{
+  position:absolute;
+  top:50%; right:44px;
+  transform:translateY(-50%);
+  width:54px; height:28px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:rgba(255,255,255,.15);
+  cursor:pointer;
+  padding:0; outline:none;
+  display:inline-block;
+}
+.ios-switch .knob{
+  position:absolute;
+  top:50%; left:3px;
+  transform:translateY(-50%);
+  width:22px; height:22px;
+  background:#fff;
+  border-radius:50%;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+  transition:left .18s ease;
+}
+.ios-switch.on{
+  background:var(--btn);
+  border-color:transparent;
+}
+.ios-switch.on .knob{
+  left: calc(100% - 25px);
+}
+
+/* piccola etichetta dell’unità a destra dello switch */
+.unit-chip{
+  position:absolute;
+  top:50%; right:10px;
+  transform:translateY(-50%);
+  font-weight:700;
+  opacity:.9;
+}
+
 
