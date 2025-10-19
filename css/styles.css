@@ -445,3 +445,9 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
 .ios-switch .label.days { left:50%; }
 .ios-switch:not(.on) .label.hours{ opacity:1; }
 .ios-switch.on .label.days{ opacity:1; }
+
+/* Toggle più corto per °C / °F */
+.temp-switch {
+  width: 110px;
+}
+
