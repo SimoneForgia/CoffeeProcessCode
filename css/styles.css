@@ -400,12 +400,12 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
 /* Toggle iOS con etichette "hours" / "days" */
 .ios-switch{
   position:absolute;
-  top:50%; right:8px;
+  top:50%; right:5px;
   transform:translateY(-50%);
   width:150px;
   height:34px;
   border:1px solid var(--line);
-  border-radius:999px;
+  border-radius:12px;
   background:rgba(255,255,255,.08);
   color:var(--fg);
   cursor:pointer;
@@ -423,7 +423,7 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
   left:4px;
   width:calc(50% - 8px);               /* metà meno il padding dx/sx */
   height:calc(100% - 8px);             /* piena altezza meno padding top/bottom */
-  border-radius:999px;                  /* arrotondata su tutti i lati */
+  border-radius:8px;                  /* arrotondata su tutti i lati */
   background:#e63e62;      /* rosa chiaro (come Clear) */
   transition:left .18s ease;
   z-index: -1;
