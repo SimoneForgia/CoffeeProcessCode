@@ -52,6 +52,16 @@ function linkFrom(cpc, opt) {
   return url.toString();
 }
 
+// ADD: helper per unità di misura della durata
+function unitFor(s){
+  // Drying sempre Days
+  if (s.main === 'D') return 'Days';
+  // Rest: in cherries (C)=Hours, in parchment (P)=Days
+  if (s.main === 'R') return (s.sub === 'P') ? 'Days' : 'Hours';
+  // tutti gli altri: Hours
+  return 'Hours';
+}
+
 /* ------- Step UI ------- */
 function buildStepBlock(i){
   const s = steps[i];
@@ -88,12 +98,18 @@ function buildStepBlock(i){
   });
 
   // change main
-  card.querySelector('#sel-'+i).addEventListener('change', e=>{
-    const main = e.target.value;
-    const cfg = CATALOG.find(x=>x.main===main) || {duration:false,extras:false,sub:[]};
-    s.main = main; s.sub = ''; s.hours=''; s.extras={temp:'',ph:''};
-    renderExtras(i, cfg, s); setRail();
-  });
+card.querySelector('#sel-'+i).addEventListener('change', e=>{
+  const main = e.target.value;
+  const cfg = CATALOG.find(x=>x.main===main) || {duration:false,extras:false,sub:[]};
+  s.main = main; s.sub = ''; s.hours='';
+  s.mucilagePct=''; 
+  s.extras={
+    container:'', addition:'', additionKind:'', thermal:'', temp:'', ph:'',
+    contactDuringDrying:'', contactKind:''
+  };
+  renderExtras(i, cfg, s); setRail();
+});
+
 
   // drag (mouse + touch) via Pointer Events
   const handle = card.querySelector('.handle');
@@ -106,7 +122,7 @@ function renderExtras(i, cfg, s) {
   const host = document.getElementById('extras-' + i);
   host.innerHTML = '';
 
-  // Subtype (second line)
+  // 1) SUBTYPE (se previsti)
   if (cfg.sub && cfg.sub.length) {
     const sub = document.createElement('div');
     sub.className = 'row';
@@ -120,38 +136,141 @@ function renderExtras(i, cfg, s) {
     sub.querySelector('#sub-' + i).addEventListener('change', e => { s.sub = e.target.value; });
   }
 
-  // Hours (if duration)
+  // 2) Depulping → Mucilage left %
+  if (s.main === 'P') {
+    const pct = document.createElement('div');
+    pct.className = 'row';
+    pct.innerHTML = `
+      <label for="pct-${i}">Mucilage left</label>
+      <select id="pct-${i}">
+        <option value="">(none)</option>
+        ${[10,25,50,75].map(v => `<option value="${v}" ${s.mucilagePct==v?'selected':''}>${v}%</option>`).join('')}
+      </select>`;
+    host.appendChild(pct);
+    pct.querySelector('#pct-'+i).addEventListener('change', e => { s.mucilagePct = e.target.value; });
+  }
+
+  // 3) Durata (se prevista)
   if (cfg.duration) {
-  const unitLabel = (s.main === 'D' || s.main === 'R') ? 'Days' : 'Hours';
-  const hrs = document.createElement('div');
-  hrs.className = 'row';
-  hrs.innerHTML = `
-    <label for="hrs-${i}">${unitLabel}</label>
-    <input id="hrs-${i}" type="number" min="0" max="999" placeholder="e.g., 24" value="${s.hours}"/>`;
-  host.appendChild(hrs);
-  hrs.querySelector('#hrs-' + i).addEventListener('input', e => {
-    const v = e.target.value.replace(/[^0-9]/g, ''); s.hours = v.slice(0, 3);
-  });
-}
+    const unitLabel = unitFor(s);
+    const hrs = document.createElement('div');
+    hrs.className = 'row';
+    hrs.innerHTML = `
+      <label for="hrs-${i}">${unitLabel}</label>
+      <input id="hrs-${i}" type="number" min="0" max="999" placeholder="e.g., ${unitLabel==='Days'?'10':'24'}" value="${s.hours}"/>`;
+    host.appendChild(hrs);
+    hrs.querySelector('#hrs-' + i).addEventListener('input', e => {
+      const v = e.target.value.replace(/[^0-9]/g, ''); s.hours = v.slice(0, 3);
+    });
+  }
 
-
-  // Extras for Fermentation only
+  // 4) Fermentation → extra campi
   if (s.main === 'F') {
-    const g = document.createElement('div'); g.className = 'grid2';
-    g.innerHTML = `
-      <div class="row">
-        <label for="temp-${i}">Temperature (°C)</label>
-        <input id="temp-${i}" type="text" placeholder="e.g., 18" value="${s.extras.temp || ''}"/>
-      </div>
-      <div class="row">
-        <label for="ph-${i}">pH</label>
-        <input id="ph-${i}" type="text" placeholder="e.g., 3.8" value="${s.extras.ph || ''}"/>
-      </div>`;
-    host.appendChild(g);
-    g.querySelector('#temp-' + i).addEventListener('input', e => { s.extras.temp = e.target.value.trim(); });
-    g.querySelector('#ph-' + i).addEventListener('input', e => { s.extras.ph = e.target.value.trim(); });
+    // Container + Temperature + Addition + (Addition kind*) + Thermal shock
+    const cont = document.createElement('div');
+    cont.className = 'row';
+    cont.innerHTML = `
+      <label for="ct-${i}">Container</label>
+      <select id="ct-${i}">
+        ${['','plastic','wood','metal','concrete','clay'].map(v=>{
+          const label = v===''?'(none)':
+            v==='plastic'?'Plastic barrel':
+            v==='wood'?'Wood barrel':
+            v==='metal'?'Metal tank':
+            v==='concrete'?'Concrete':
+            'Clay pot';
+          return `<option value="${v}" ${s.extras.container===v?'selected':''}>${label}</option>`;
+        }).join('')}
+      </select>`;
+    host.appendChild(cont);
+    cont.querySelector('#ct-'+i).addEventListener('change', e => { s.extras.container = e.target.value; });
+
+    const temp = document.createElement('div');
+    temp.className = 'row';
+    temp.innerHTML = `
+      <label for="temp-${i}">Temperature (°C)</label>
+      <input id="temp-${i}" type="text" placeholder="e.g., 18" value="${s.extras.temp || ''}"/>`;
+    host.appendChild(temp);
+    temp.querySelector('#temp-'+i).addEventListener('input', e => { s.extras.temp = e.target.value.trim(); });
+
+    const add = document.createElement('div');
+    add.className = 'row';
+    add.innerHTML = `
+      <label for="add-${i}">Addition of</label>
+      <select id="add-${i}">
+        ${['nothing','mosto','yeast','bacteria','koji','fruits','herbs','spices','flowers','essential','other'].map(v=>{
+          const lbl = v==='nothing'?'Nothing':
+                      v==='essential'?'Essential oils':
+                      v[0].toUpperCase()+v.slice(1);
+          return `<option value="${v}" ${s.extras.addition===v?'selected':''}>${lbl}</option>`;
+        }).join('')}
+      </select>`;
+    host.appendChild(add);
+    const addSel = add.querySelector('#add-'+i);
+    addSel.addEventListener('change', e => { s.extras.addition = e.target.value; toggleAddKind(); });
+
+    const addKind = document.createElement('div');
+    addKind.className = 'row';
+    addKind.innerHTML = `
+      <label for="addk-${i}">Specify kind</label>
+      <input id="addk-${i}" type="text" placeholder="e.g., mango / lavender / cinnamon" value="${s.extras.additionKind || ''}"/>`;
+    host.appendChild(addKind);
+    const addKindInput = addKind.querySelector('#addk-'+i);
+    addKindInput.addEventListener('input', e => { s.extras.additionKind = e.target.value.trim(); });
+
+    function toggleAddKind(){
+      const need = ['fruits','herbs','spices','flowers','essential','other'].includes(s.extras.addition);
+      addKind.style.display = need ? '' : 'none';
+      if (!need) s.extras.additionKind = '';
+    }
+    toggleAddKind();
+
+    const thermal = document.createElement('div');
+    thermal.className = 'row';
+    thermal.innerHTML = `
+      <label for="th-${i}">Thermal shock</label>
+      <select id="th-${i}">
+        <option value="">(none)</option>
+        <option value="yes" ${s.extras.thermal==='yes'?'selected':''}>Yes</option>
+        <option value="no"  ${s.extras.thermal==='no'?'selected':''}>No</option>
+      </select>`;
+    host.appendChild(thermal);
+    thermal.querySelector('#th-'+i).addEventListener('change', e => { s.extras.thermal = e.target.value; });
+  }
+
+  // 5) Drying → domanda contatto + kind se yes
+  if (s.main === 'D') {
+    const c = document.createElement('div');
+    c.className = 'row';
+    c.innerHTML = `
+      <label for="cd-${i}">Were the beans put into contact with any other product during drying?</label>
+      <select id="cd-${i}">
+        <option value="">(none)</option>
+        <option value="no"  ${s.extras.contactDuringDrying==='no'?'selected':''}>No</option>
+        <option value="yes" ${s.extras.contactDuringDrying==='yes'?'selected':''}>Yes</option>
+      </select>`;
+    host.appendChild(c);
+    const sel = c.querySelector('#cd-'+i);
+    sel.addEventListener('change', e => { s.extras.contactDuringDrying = e.target.value; toggleKind(); });
+
+    const k = document.createElement('div');
+    k.className = 'row';
+    k.innerHTML = `
+      <label for="cdk-${i}">Specify kind</label>
+      <input id="cdk-${i}" type="text" placeholder="e.g., orange peels on beds" value="${s.extras.contactKind || ''}"/>`;
+    host.appendChild(k);
+    const kInput = k.querySelector('#cdk-'+i);
+    kInput.addEventListener('input', e => { s.extras.contactKind = e.target.value.trim(); });
+
+    function toggleKind(){
+      const need = s.extras.contactDuringDrying === 'yes';
+      k.style.display = need ? '' : 'none';
+      if (!need) s.extras.contactKind = '';
+    }
+    toggleKind();
   }
 }
+
 
 function refreshSteps(){
   stepsWrap.innerHTML='';
@@ -329,16 +448,70 @@ $('#clearAll').addEventListener('click', () => {
 
 // Generate
 $('#gen')?.addEventListener('click', async () => {
+  // passi minimi: almeno 2 step selezionati
   const filled = steps.filter(s => s.main);
-  if (filled.length < 2) { hint.textContent = 'Please add at least two steps.'; return; }
+  if (filled.length < 2) {
+    hint.textContent = 'Please add at least two steps.';
+    return;
+  }
+
+  // validazioni per durata + campi opzionali che puoi voler rendere obbligatori
   for (const s of filled) {
     const cfg = CATALOG.find(x => x.main === s.main);
-    if (cfg && cfg.duration && (s.hours === '')) { hint.textContent = 'Please fill Hours where required.'; return; }
+
+    // Durata obbligatoria dove previsto (Hours/Days a seconda dello step)
+    if (cfg && cfg.duration) {
+      const v = String(s.hours ?? '').trim();
+      if (!/^\d{1,3}$/.test(v)) {
+        hint.textContent = 'Please fill duration where required.';
+        return;
+      }
+    }
+
+    // Depulping: se vuoi forzare la % di mucillagine (opzionale, lascia commentato)
+    // if (s.main === 'P') {
+    //   const ex = s.extras || {};
+    //   if (ex.requireMucilagePct && (ex.mucilagePct === '' || ex.mucilagePct == null)) {
+    //     hint.textContent = 'Please select mucilage left %.';
+    //     return;
+    //   }
+    // }
+
+    // Fermentation: se si seleziona un’aggiunta “descrittiva”, va specificato cosa
+    if (s.main === 'F') {
+      const ex = s.extras || {};
+      const needsKind = ['fruits', 'herbs', 'spices', 'flowers', 'essential', 'other']
+        .includes(ex.addition);
+      if (needsKind && !(ex.additionKind && ex.additionKind.trim())) {
+        hint.textContent = 'Please specify what was added during fermentation.';
+        return;
+      }
+    }
+
+    // Drying: se è stato indicato contatto con un prodotto, va specificato quale
+    if (s.main === 'D') {
+      const ex = s.extras || {};
+      if (ex.contactDuringDrying === 'yes' && !(ex.contactKind && ex.contactKind.trim())) {
+        hint.textContent = 'Please specify the product put in contact during drying.';
+        return;
+      }
+    }
+
+    // Rest: nessuna validazione extra oltre alla durata
   }
-  const cpc = buildCPC(); cpcEl.textContent = cpc; hint.textContent = '';
-  if (beanPanel) beanPanel.classList.add('open'); // mostra il BeanTag solo ora
-  redrawLinkAndTag(cpc); setRail();
+
+  // ok: genera CPC e aggiorna UI
+  const cpc = buildCPC();
+  cpcEl.textContent = cpc;
+  hint.textContent = '';
+
+  // mostra il BeanTag solo dopo la generazione
+  if (beanPanel) beanPanel.classList.add('open');
+
+  redrawLinkAndTag(cpc);
+  setRail();
 });
+
 
 // Copy CPC (eventuale icona o fallback bottone)
 (document.getElementById('copyIcon') || document.getElementById('copyCpc'))?.addEventListener('click', ()=>{
