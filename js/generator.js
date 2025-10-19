@@ -210,7 +210,6 @@ if (cfg.duration) {
   if (s.main === 'F') {
     // Container + Temperature + Addition + (Addition kind*) + Thermal shock
     
-    const temp = document.createElement('div');
     // Temperature con toggle °C / °F
 const temp = document.createElement('div');
 temp.className = 'row';
