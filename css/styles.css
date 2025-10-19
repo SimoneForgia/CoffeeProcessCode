@@ -492,3 +492,15 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
   border: 0;
   padding: 0;
 }
+
+
+/* --- CPC: campi richiesti mancanti --- */
+.is-missing {
+  background: #f6f6f6 !important;   /* leggermente più chiaro */
+  outline: 1.5px solid rgba(0,0,0,.08);
+  transition: background .2s ease, outline .2s ease;
+}
+.row.is-missing label {
+  opacity: .8;
+}
+
