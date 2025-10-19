@@ -451,3 +451,30 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
   width: 110px;
 }
 
+/* ✅ Disattiva effetti nativi su mobile (iOS/Android) */
+.ios-switch,
+.temp-switch {
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent; /* niente flash grigio/azzurro */
+  background-image: none;                    /* alcuni Android applicano gradienti */
+}
+
+/* ✅ Mantieni lo stesso colore anche durante tap/focus */
+.ios-switch:focus,
+.ios-switch:active,
+.temp-switch:focus,
+.temp-switch:active {
+  outline: none;
+  box-shadow: none;
+  background: rgba(255,255,255,.08); /* uguale al tuo valore base */
+}
+
+/* (facoltativo) rimuove il padding interno “fantasma” su Firefox */
+.ios-switch::-moz-focus-inner,
+.temp-switch::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
