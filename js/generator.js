@@ -41,11 +41,14 @@ let steps = [blankStep(), blankStep()];
 function flagMissing(selector, scope=document){
   const el = scope.querySelector(selector);
   if (!el) return;
-  el.classList.add('is-missing');
-  el.closest('.row')?.classList.add('is-missing');
+  // se esiste un wrapper “a box” (es. .time-field), evidenzia quello;
+  // altrimenti evidenzia direttamente l’elemento (select/input).
+  const box = el.closest('.time-field') || el;
+  box.classList.add('is-missing');
 }
+
 function clearMissing(){
-  document.querySelectorAll('.is-missing').forEach(n=> n.classList.remove('is-missing'));
+  document.querySelectorAll('.is-missing').forEach(n => n.classList.remove('is-missing'));
 }
 
 function tokenForStep(s) {
@@ -345,6 +348,11 @@ swT.addEventListener('click', () => {
     const kInput = k.querySelector('#cdk-'+i);
     kInput.addEventListener('input', e => { s.extras.contactKind = e.target.value.trim(); });
 
+    if (!ex.contactDuringDrying) {
+  flagMissing(`#cd-${steps.indexOf(s)}`);
+  hasErr = true;
+}
+
     function toggleKind(){
       const need = s.extras.contactDuringDrying === 'yes';
       k.style.display = need ? '' : 'none';
@@ -544,6 +552,14 @@ $('#gen')?.addEventListener('click', async () => {
 
   for (const [idx, s] of filled.entries()) {
     const cfg = CATALOG.find(x => x.main === s.main) || {};
+
+    // Subtype richiesto se esiste la lista sub e non è Washing
+if ((cfg.sub && cfg.sub.length) && s.main !== 'W') {
+  if (!s.sub) {
+    flagMissing(`#sub-${steps.indexOf(s)}`);
+    hasErr = true;
+  }
+}
 
     // 1) Durata obbligatoria dove previsto, MA NON per Drying (D) che è opzionale
     if (cfg.duration && s.main !== 'D') {
