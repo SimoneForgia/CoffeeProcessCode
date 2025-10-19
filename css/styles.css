@@ -500,7 +500,6 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
 select.is-missing,
 input.is-missing {
   background: #e63e62 !important;                  /* tinta piena */
-  background-image: none !important;               /* niente gradient */
   -webkit-appearance: none !important;             /* safari/ios select/input */
   appearance: none !important;
   filter: none !important;
