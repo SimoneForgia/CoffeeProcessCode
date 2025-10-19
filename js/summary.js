@@ -5,7 +5,7 @@ const summaryEl = $('#summary');
 function parseCPC(cpc){
   if(!cpc) return [];
   return cpc.split('.').filter(Boolean).map(tok=>{
-    const m = tok.match(/^([A-Z])([A-Z]?)(\d{0,3})?([hd])?$/);
+    const m = tok.match(/^([A-Z])([A-Z]?)(\d{0,3})([hd])?$/); // ← legge anche h/d
     if(!m) return {raw:tok, main:'?', sub:'', hours:'', unit:''};
     return {raw:tok, main:m[1], sub:m[2]||'', hours:m[3]||'', unit:m[4]||''};
   });
@@ -97,19 +97,18 @@ function renderVerticalSummary(cpc){
 
   const codeTime = document.createElement('div');
   codeTime.className = 'sum-code mono';
-  codeTime.textContent = g.hours;
+  codeTime.textContent = `${g.hours}${g.unit||''}`; // es. 17h / 3d
   liTime.appendChild(codeTime);
 
   const n = parseInt(g.hours, 10);
-  const unitChar = (g.unit === 'd' || g.unit === 'h') ? g.unit : ((g.main==='D'||g.main==='R') ? 'd' : 'h');
-  const unitWord = unitChar === 'd' ? 'day' : 'hour';
-
+  const unitFull = (g.unit === 'd') ? 'day' : 'hour';
   const rightTime = document.createElement('div');
-  rightTime.textContent = `${n} ${unitWord}${n === 1 ? '' : 's'}`;
+  rightTime.textContent = `${n} ${unitFull}${n === 1 ? '' : 's'}`;
   liTime.appendChild(rightTime);
 
   frag.appendChild(liTime);
 }
+
 
 
     // --- SEPARATORE con "Step N+1" nella cella destra ---
