@@ -467,7 +467,7 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
   background-image: none;
 
   /* stile del tuo toggle (ribadito per vincere su regole globali) */
-  background: rgba(255,255,255,.08) !important;
+  background: #6b1631 !important;
   border: 1px solid var(--line) !important;
   cursor: pointer;
 }
@@ -481,7 +481,7 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
 .temp-switch:active,
 .temp-switch:focus,
 .temp-switch:focus-visible{
-  background: rgba(255,255,255,.08) !important;
+  background: #6b1631 !important;
   box-shadow: none !important;
   outline: none !important;
 }
