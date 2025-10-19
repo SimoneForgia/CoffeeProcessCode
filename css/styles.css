@@ -142,7 +142,12 @@ select,input,button{width:100%;padding:12px;border-radius:12px;border:1px solid 
   background:rgba(0,0,0,.18);color:var(--fg);font-size:16px;height:46px}
 select{cursor:pointer}
 button{background:var(--btn);border:none;color:var(--fg);font-weight:700;cursor:pointer}
-button:hover{background:var(--btnHover)}
+
+/* non toccare i toggle */
+button:hover:not(.ios-switch):not(.temp-switch){
+  background: var(--btnHover);
+}
+
 button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)}
 .actions{display:flex;gap:10px;justify-content:space-between;margin-top:6px}
 .tiny{font-size:12px;color:var(--muted)}
