@@ -498,10 +498,15 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
 .time-field.is-missing,
 select.is-missing,
 input.is-missing {
-  background: #e63e62;        /* un filo più chiaro */
+  background: #e63e62 !important;        /* un filo più chiaro */
   box-shadow: inset 0 0 0 2px rgba(255,255,255,0.15);
   transition: background .2s ease, box-shadow .2s ease;
   border-radius: 12px;
+}
+
+/* Uniforma il colore anche nei select con background personalizzato */
+select.is-missing {
+  background-image: none !important;
 }
 
 /* Non toccare i label */
