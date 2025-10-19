@@ -104,7 +104,7 @@ card.querySelector('#sel-'+i).addEventListener('change', e=>{
   s.main = main; s.sub = ''; s.hours='';
   s.mucilagePct=''; 
   s.extras={
-    container:'', addition:'', additionKind:'', thermal:'', temp:'', ph:'',
+    container:'', addition:'', additionKind:'', thermal:'no', temp:'', ph:'',
     contactDuringDrying:'', contactKind:''
   };
   renderExtras(i, cfg, s); setRail();
@@ -129,7 +129,7 @@ function renderExtras(i, cfg, s) {
     sub.innerHTML = `
       <label for="sub-${i}">Subtype</label>
       <select id="sub-${i}">
-        <option value="">(none)</option>
+        <option value="">Select an option</option>
         ${cfg.sub.map(k => `<option value="${k}" ${s.sub === k ? 'selected' : ''}>${SUB_LABELS[k]}</option>`).join('')}
       </select>`;
     host.appendChild(sub);
@@ -143,7 +143,7 @@ function renderExtras(i, cfg, s) {
     pct.innerHTML = `
       <label for="pct-${i}">Mucilage left</label>
       <select id="pct-${i}">
-        <option value="">(none)</option>
+        <option value="">Select an option</option>
         ${[10,25,50,75].map(v => `<option value="${v}" ${s.mucilagePct==v?'selected':''}>${v}%</option>`).join('')}
       </select>`;
     host.appendChild(pct);
@@ -173,7 +173,7 @@ function renderExtras(i, cfg, s) {
       <label for="ct-${i}">Container</label>
       <select id="ct-${i}">
         ${['','plastic','wood','metal','concrete','clay'].map(v=>{
-          const label = v===''?'(none)':
+          const label = v===''?'Select an option':
             v==='plastic'?'Plastic barrel':
             v==='wood'?'Wood barrel':
             v==='metal'?'Metal tank':
@@ -230,7 +230,6 @@ function renderExtras(i, cfg, s) {
     thermal.innerHTML = `
       <label for="th-${i}">Thermal shock</label>
       <select id="th-${i}">
-        <option value="">(none)</option>
         <option value="yes" ${s.extras.thermal==='yes'?'selected':''}>Yes</option>
         <option value="no"  ${s.extras.thermal==='no'?'selected':''}>No</option>
       </select>`;
@@ -245,7 +244,7 @@ function renderExtras(i, cfg, s) {
     c.innerHTML = `
       <label for="cd-${i}">Were the beans put into contact with any other product during drying?</label>
       <select id="cd-${i}">
-        <option value="">(none)</option>
+        <option value="">Select an option</option>
         <option value="no"  ${s.extras.contactDuringDrying==='no'?'selected':''}>No</option>
         <option value="yes" ${s.extras.contactDuringDrying==='yes'?'selected':''}>Yes</option>
       </select>`;
