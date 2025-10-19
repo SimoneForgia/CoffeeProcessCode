@@ -456,30 +456,39 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
   width: 110px;
 }
 
-/* ✅ Disattiva effetti nativi su mobile (iOS/Android) */
+/* reset completo per i toggle */
 .ios-switch,
-.temp-switch {
+.temp-switch{
   -webkit-appearance: none;
   appearance: none;
   outline: none;
   box-shadow: none;
-  -webkit-tap-highlight-color: transparent; /* niente flash grigio/azzurro */
-  background-image: none;                    /* alcuni Android applicano gradienti */
+  -webkit-tap-highlight-color: transparent;
+  background-image: none;
+
+  /* stile del tuo toggle (ribadito per vincere su regole globali) */
+  background: rgba(255,255,255,.08) !important;
+  border: 1px solid var(--line) !important;
+  cursor: pointer;
 }
 
-/* ✅ Mantieni lo stesso colore anche durante tap/focus */
-.ios-switch:focus,
+/* mantieni lo stesso colore in hover/active/focus */
+.ios-switch:hover,
 .ios-switch:active,
+.ios-switch:focus,
+.ios-switch:focus-visible,
+.temp-switch:hover,
+.temp-switch:active,
 .temp-switch:focus,
-.temp-switch:active {
-  outline: none;
-  box-shadow: none;
-  background: rgba(255,255,255,.08); /* uguale al tuo valore base */
+.temp-switch:focus-visible{
+  background: rgba(255,255,255,.08) !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
-/* (facoltativo) rimuove il padding interno “fantasma” su Firefox */
+/* Firefox: rimuove il bordo interno di default */
 .ios-switch::-moz-focus-inner,
-.temp-switch::-moz-focus-inner {
+.temp-switch::-moz-focus-inner{
   border: 0;
   padding: 0;
 }
