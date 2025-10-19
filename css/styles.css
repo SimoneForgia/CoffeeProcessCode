@@ -390,50 +390,54 @@ a.btn{display:inline-block;background:transparent;border:1px solid var(--line);
 }
 
 
-/* Time field with iOS-like switch inside */
+/* Time field: input con toggle dentro a destra */
 .time-field{ position:relative; }
 .time-field input{
   width:100%;
-  padding-right:96px;                 /* spazio per lo switch e la chip */
+  padding-right:180px;            /* spazio per toggle lungo */
 }
 
+/* Toggle iOS con etichette "hours" / "days" */
 .ios-switch{
   position:absolute;
-  top:50%; right:44px;
+  top:50%; right:8px;
   transform:translateY(-50%);
-  width:54px; height:28px;
+  width:150px;                    /* lungo */
+  height:34px;
   border:1px solid var(--line);
   border-radius:999px;
-  background:rgba(255,255,255,.15);
+  background:rgba(255,255,255,.08);
+  color:var(--fg);
   cursor:pointer;
-  padding:0; outline:none;
+  padding:0;
+  outline:none;
   display:inline-block;
+  overflow:hidden;
 }
-.ios-switch .knob{
+
+/* placca rosa chiaro che scorre sotto al testo (metà larghezza) */
+.ios-switch .thumb{
   position:absolute;
-  top:50%; left:3px;
-  transform:translateY(-50%);
-  width:22px; height:22px;
-  background:#fff;
-  border-radius:50%;
-  box-shadow:0 2px 6px rgba(0,0,0,.25);
+  top:0; left:0;
+  width:50%; height:100%;
+  background:rgba(255,213,225,.5);          /* ≈ rosa chiaro (come “Clear”) */
+  border-right:1px solid rgba(0,0,0,.06);
   transition:left .18s ease;
 }
-.ios-switch.on{
-  background:var(--btn);
-  border-color:transparent;
-}
-.ios-switch.on .knob{
-  left: calc(100% - 25px);
-}
+.ios-switch.on .thumb{ left:50%; }
 
-/* piccola etichetta dell’unità a destra dello switch */
-.unit-chip{
+/* etichette */
+.ios-switch .label{
   position:absolute;
-  top:50%; right:10px;
-  transform:translateY(-50%);
-  font-weight:700;
-  opacity:.9;
+  top:0; width:50%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:14px;
+  pointer-events:none;            /* clic passa sempre al bottone */
 }
+.ios-switch .label.hours{ left:0; }
+.ios-switch .label.days { left:50%; }
 
-
+/* stato attivo: testo un filo più evidente sopra la placca */
+.ios-switch .label{ opacity:.9; }
+.ios-switch:not(.on) .label.hours{ opacity:1; }
+.ios-switch.on .label.days{ opacity:1; }
