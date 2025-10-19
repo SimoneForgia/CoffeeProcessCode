@@ -82,7 +82,9 @@ function renderVerticalSummary(cpc){
       liSub.appendChild(codeSub);
 
       const rightSub = document.createElement('div');
-      rightSub.appendChild(makeDetails('S' + g.sub, SUB_LABELS[g.sub] || g.sub, 'S' + g.sub));
+      const subKey = g.main + g.sub; // es. 'W'+'M' => 'WM'
+      const subLabel = SUB_LABELS[subKey] || SUB_LABELS[g.sub] || g.sub;
+      rightSub.appendChild(makeDetails(subKey, subLabel, subKey));
       liSub.appendChild(rightSub);
 
       frag.appendChild(liSub);
