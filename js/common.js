@@ -30,11 +30,6 @@ export const SUB_LABELS = {
   M:'With mechanical demucilagers',
   K:'Manually with the Kenyan process',
   R:'Only rinsed with water',
-
-  // Drying
-  SR:'Raised beds'
-  SP:'Patio',
-  SM:'Mechanical',
   
   // Resting
   P:'In parchment',
