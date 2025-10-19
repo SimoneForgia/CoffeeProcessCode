@@ -1,32 +1,101 @@
 export const CATALOG = [
-  { main:'W', label:'Washing', duration:false, extras:false },
-  { main:'P', label:'Depulping', duration:false, extras:false },
-  { main:'F', label:'Fermentation', duration:true, extras:true, sub:['A','N','C','I','H'] },
-  { main:'D', label:'Drying', duration:true, extras:false, sub:['R','P','M','S'] },
-  { main:'R', label:'Rest in parchment', duration:true, extras:false }
+  { main:'L', label:'Floating',      duration:false, extras:false, sub:[] },
+
+  { main:'P', label:'Depulping',     duration:false, extras:true,  sub:[] },      // mucilage % opzionale via extras
+
+  { main:'F', label:'Fermentation',  duration:true,  extras:true,  sub:['A','N','C','I'] },
+  // A=Aerobic, N=Anaerobic, C=Carbonic, I=Immersion
+
+  { main:'W', label:'Washing',       duration:false, extras:false, sub:['M','K','R'] },
+  // M=Mechanical demucilagers, K=Kenyan process, R=Only rinsed with water
+
+  { main:'D', label:'Drying',        duration:true,  extras:true,  sub:['R','P','M'] },
+  // R=Raised beds, P=Patio, M=Mechanical (+ domanda contatto durante l’asciugatura)
+
+  { main:'R', label:'Rest',          duration:true,  extras:false, sub:['C','P'] },
+  // C=In cherries (Hours), P=In parchment (Days)
+
+  { main:'H', label:'Hulling',       duration:false, extras:false, sub:['W','D'] }
+  // W=Wet, D=Dry
 ];
-export const SUB_LABELS = {A:'Aerobic',N:'Anaerobic',C:'Carbonic',I:'Immersion',H:'Cherry',R:'Raised',P:'Patio',M:'Mechanical',S:'Shade'};
+
+export const SUB_LABELS = {
+  // Fermentation
+  A:'Aerobic',
+  N:'Anaerobic',
+  C:'Carbonic (F) / Cherries (R)', // C è "Carbonic" in F e "Cherries" in R
+  I:'Immersion',
+
+  // Washing
+  M:'Mechanical demucilagers (W) / Mechanical (D)',
+  K:'Kenyan process',
+  R:'Rinsed (W) / Raised (D)',
+
+  // Drying
+  P:'Patio / Parchment (R)',       // P è "Patio" in D e "Parchment" in R
+
+  // Rest
+  W:'Wet (H)',
+  D:'Dry (H)'
+};
 
 export const DESCRIPTIONS = {
-  W:'Removal of mucilage with water to control fermentation and clean parchment.',
-  P:'Removal of the outer skin/pulp from the cherry using mechanical depulpers.',
+  /* --- Categorie (1 lettera) --- */
+  L:'Density sorting in water to remove floaters/defects prior to processing.',
+  P:'Removal of the outer skin/pulp. Optionally leaves a % of mucilage on parchment.',
   F:'Controlled microbial activity that transforms mucilage and impacts flavor.',
-  D:'Reduction of moisture to safe storage levels on patios, raised beds, shade or machines.',
-  R:'Conditioning period allowing moisture equilibration before hulling.',
-  SA:'Fermentation made with xygen available during the process.',
-  SN:'Fermentation made without oxygen, often by sealing the beans in tanks.',
-  SC:'Whole-cherry fermentation in CO₂-rich environment (wine-inspired).',
-  SI:'Cherries or parchment are submerged in water during fermentation.',
-  SH:'Fermentation occurs with whole cherries.',
-  SR:'Suspended mesh beds improving airflow and uniformity. Also known as African beds',
-  SP:'Beans were dried on open air patios, typically concrete or tiled floors.',
-  SM:'Beans were dried using assisted/mechanical dryers to accelerate moisture removal.',
-  SS:'Beans were dried under shade to slow rate and protect from direct sun.'
+  W:'Washing stage to remove mucilage and/or finish fermentation.',
+  D:'Reduction of moisture to safe storage levels on patios, raised beds or machines.',
+  R:'Conditioning period before/after hulling.',
+  H:'Removal of parchment (dry) or wet-hulling style.',
+
+  /* --- Fermentation (F + sub) --- */
+  FA:'Fermentation with oxygen available (aerobic).',
+  FN:'Fermentation in low/zero-oxygen environment (anaerobic).',
+  FC:'Whole-cherry/CO₂-rich “carbonic maceration”.',
+  FI:'Cherries or parchment fully submerged in water (immersion).',
+
+  /* --- Washing (W + sub) --- */
+  WM:'Mucilage removed using mechanical demucilagers.',
+  WK:'Manual wash using the Kenyan process (double ferment/soak).',
+  WR:'Only rinsed with water, minimal mechanical/microbial action.',
+
+  /* --- Drying (D + sub) --- */
+  DR:'Dried on raised (African) beds with strong airflow.',
+  DP:'Dried on patios (concrete/tiles).',
+  DM:'Dried using assisted/mechanical dryers.',
+
+  /* --- Rest (R + sub) --- */
+  RC:'Rest in cherries (typically measured in hours).',
+  RP:'Rest/conditioning in parchment (typically measured in days).',
+
+  /* --- Hulling (H + sub) --- */
+  HW:'Wet hulling.',
+  HD:'Dry hulling.'
 };
 
 export const $ = (s, root=document) => root.querySelector(s);
 export const $$ = (s, root=document) => [...root.querySelectorAll(s)];
-export const blankStep = () => ({ main:'', sub:'', hours:'', extras:{ temp:'', ph:'' } });
+
+export const blankStep = () => ({
+  main:'', sub:'', hours:'',
+  // campi extra opzionali
+  mucilagePct:'',              // Depulping: 10|25|50|75
+  extras:{
+    // Fermentation
+    container:'',              // none|plastic|wood|metal|concrete|clay
+    addition:'',               // nothing|mosto|yeast|bacteria|koji|fruits|herbs|spices|flowers|essential|other
+    additionKind:'',           // testo richiesto se addition ∈ {fruits,herbs,spices,flowers,essential,other}
+    thermal:'',                // yes|no
+    temp:'',                   // °C (se vuoi mantenerlo)
+    ph:'',                     // opzionale: lo lasci se ti serve ancora
+
+    // Drying
+    contactDuringDrying:'',    // yes|no
+    contactKind:''             // testo richiesto se yes
+  }
+});
+
 
 export function tokenForStep(s){
   if(!s || !s.main) return '';
@@ -35,13 +104,37 @@ export function tokenForStep(s){
 }
 export function buildCPC(steps){ return steps.map(tokenForStep).filter(Boolean).join('.'); }
 export function safeB64Encode(obj){ return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
+
 export function buildOpt(steps){
-  const list=[]; steps.forEach((s,i)=>{ const ex=s.extras||{}; const payload={};
-    if(ex.temp) payload.T=ex.temp; if(ex.ph) payload.pH=ex.ph;
-    if(Object.keys(payload).length) list.push({i, ...payload});
+  const list=[];
+  steps.forEach((s,i)=>{
+    const ex = s.extras || {};
+    const payload = {};
+
+    // Depulping
+    if (s.main==='P' && s.mucilagePct) payload.MP = s.mucilagePct;
+
+    // Fermentation
+    if (s.main==='F') {
+      if (ex.container)    payload.Ct  = ex.container;
+      if (ex.addition)     payload.Add = ex.addition;
+      if (ex.additionKind) payload.AddK= ex.additionKind;
+      if (ex.thermal)      payload.Th  = ex.thermal;
+      if (ex.temp)         payload.T   = ex.temp;
+      if (ex.ph)           payload.pH  = ex.ph;
+    }
+
+    // Drying
+    if (s.main==='D') {
+      if (ex.contactDuringDrying) payload.CD = ex.contactDuringDrying;
+      if (ex.contactKind)         payload.CDK= ex.contactKind;
+    }
+
+    if (Object.keys(payload).length) list.push({ i, ...payload });
   });
-  return list.length? {steps:list}:null;
+  return list.length ? { steps:list } : null;
 }
+
 
 // Hash + PRNG for BeanTag
 export async function strongHash(str){
