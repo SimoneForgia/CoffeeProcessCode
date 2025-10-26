@@ -500,4 +500,40 @@ input.is-missing {
   box-shadow: none !important;
 }
 
+/* --- Select: caret custom, spostato verso sinistra --- */
+select{
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 34px;                /* spazio per la freccia */
+  background-repeat: no-repeat;
+  background-position: right 10px center; /* 🔸 più lontana dal bordo */
+  background-size: 10px 6px;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 6" width="10" height="6"><path d="M1 1l4 4 4-4" fill="none" stroke="%23ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+}
+
+/* Quando il campo è evidenziato (.is-missing) mantieni la freccia */
+select.is-missing{
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  padding-right: 34px !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 10px 6px !important;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 6" width="10" height="6"><path d="M1 1l4 4 4-4" fill="none" stroke="%23ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>') !important;
+}
+
+/* --- Inputs manuali senza gradient --- */
+input[type="number"],
+input[type="text"]{
+  background-image: none !important;   /* niente gradient/recessi strani di default */
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Anche quando evidenziati (.is-missing) mantiene tinta piatta */
+input.is-missing{
+  background-image: none !important;
+}
+
+
 
