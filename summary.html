@@ -5,10 +5,25 @@
 </head><body>
 <div class="wrap">
   <h1>Coffee Process Code breakdown</h1>
+
+<div id="processSummary" class="summary-paragraph"></div>
+
   <p class="lead">Expand the titles for explanations about the different steps this coffee went through.</p>
   <div class="card">
     <ul id="summary"></ul>
   </div>
 </div>
 <script type="module" src="js/summary.js"></script>
+
+<script src="js/summary-narrator.js" defer></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    SummaryNarrator.init({
+      target: '#processSummary',
+      useLastly: true
+    });
+  });
+</script>
+
+
 </body></html>
