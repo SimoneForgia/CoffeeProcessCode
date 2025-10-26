@@ -23,7 +23,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,Segoe
   width:100%;
 }
 .step .inline{ align-items:center; }  /* già presente nella versione che ti ho dato */
-select{ line-height:1; }              /* piccola correzione per l’altezza interna della select */
+select{ line-height:1.3; }              /* piccola correzione per l’altezza interna della select */
 
 
 h1{font-size:20px;margin:6px 0 6px}
