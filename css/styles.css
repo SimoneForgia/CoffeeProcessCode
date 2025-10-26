@@ -535,11 +535,20 @@ input.is-missing{
   background-image: none !important;
 }
 
-/* Colore del placeholder quando il campo è evidenziato */
+/* Placeholder più chiaro quando il campo è evidenziato (missing) */
+.time-field.is-missing input::placeholder,
 input.is-missing::placeholder,
-input.is-missing::-webkit-input-placeholder {
-  color: rgba(255,255,255,0.65) !important;
-  opacity: 1 !important;
+.time-field.is-missing input::-webkit-input-placeholder,
+input.is-missing::-webkit-input-placeholder{
+  color: rgba(255,255,255,0.70) !important; /* più chiaro */
+  opacity: 1 !important;                    /* Safari */
 }
+
+/* (opzionale) Colore del testo reale nei campi evidenziati, per contrasto */
+.time-field.is-missing input,
+input.is-missing{
+  color: #ffffff !important;
+}
+
 
 
