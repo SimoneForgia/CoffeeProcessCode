@@ -86,7 +86,7 @@ function buildStepBlock(i){
   card.className = 'step';
   card.dataset.index = i;
 
-  // numero “1)” a sinistra, select che riempie, maniglia a destra, X in alto-destra
+  // numero “Step N” sopra al dropdown, X in alto-destra
   card.innerHTML = `
   <button class="xbtn" title="Remove" aria-label="Remove">×</button>
 
@@ -95,18 +95,17 @@ function buildStepBlock(i){
     <label class="step-title">Step ${i+1}</label>
   </div>
 
-  <!-- Riga: solo select a sinistra | handle invisibile a destra -->
-  <div class="inline" style="gap:8px;display:grid;grid-template-columns:1fr auto;align-items:end">
-    <div>
-      <select id="sel-${i}">
-        <option value="">Select an operation…</option>
-        ${CATALOG.map(o=>`<option value="${o.main}" ${s.main===o.main?'selected':''}>${o.label}</option>`).join('')}
-      </select>
-    </div>
-    <button class="handle" title="Reorder" aria-label="Reorder"></button>
+  <!-- Solo il select; nessun handle -->
+  <div class="row">
+    <select id="sel-${i}">
+      <option value="">Select an operation…</option>
+      ${CATALOG.map(o=>`<option value="${o.main}" ${s.main===o.main?'selected':''}>${o.label}</option>`).join('')}
+    </select>
   </div>
 
   <div id="extras-${i}" class="row"></div>
+`;
+v id="extras-${i}" class="row"></div>
 `;
   stepsWrap.appendChild(card);
 
@@ -134,12 +133,6 @@ card.querySelector('#sel-'+i).addEventListener('change', e=>{
   renderExtras(i, cfg, s); setRail();
 });
 
-
-
-
-  // drag (mouse + touch) via Pointer Events
-  const handle = card.querySelector('.handle');
-  handle.addEventListener('pointerdown', (ev)=> startDrag(ev, card));
 
   renderExtras(i, CATALOG.find(x=>x.main===s.main)||{duration:false,extras:false,sub:[]}, s);
 }
@@ -373,91 +366,6 @@ function refreshSteps(){
   setRail();
 }
 
-/* === Drag & drop fluido stile iOS (Pointer Events, con translateY) === */
-let drag = { active:false, el:null, startPageY:0, startIndex:0, ph:null, baseTop:0 };
-
-function startDrag(ev, el){
-  ev.preventDefault();
-  el.setPointerCapture?.(ev.pointerId);
-
-  drag.active = true;
-  drag.el = el;
-  drag.startPageY = ev.pageY;            // usa pageY per non “saltare” con lo scroll
-  drag.startIndex = [...stepsWrap.children].indexOf(el);
-  drag.baseTop = el.offsetTop;
-
-  // placeholder che occupa spazio
-  drag.ph = document.createElement('div');
-  drag.ph.className = 'step';
-  drag.ph.style.visibility = 'hidden';
-  drag.ph.style.height = el.getBoundingClientRect().height + 'px';
-  stepsWrap.insertBefore(drag.ph, el.nextSibling);
-
-  // “stacchiamo” l’elemento, ma lo muoviamo con translateY: segue il dito
-  el.classList.add('drag-ghost');
-  el.style.position = 'absolute';
-  el.style.left = el.offsetLeft + 'px';
-  el.style.width = el.offsetWidth + 'px';
-  el.style.top = drag.baseTop + 'px';
-  el.style.transform = 'translateY(0px)';
-  el.style.pointerEvents = 'none';
-
-  window.addEventListener('pointermove', onDragMove);
-  window.addEventListener('pointerup', endDrag, { once:true });
-}
-
-function onDragMove(ev){
-  if(!drag.active) return;
-  const el = drag.el;
-
-  // delta rispetto all’ultimo evento, con pageY (robusto su touch)
-  const dy = ev.pageY - drag.startPageY;
-  drag.startPageY = ev.pageY;
-
-  // muovi l’elemento
-  const currentY = parseFloat(el.style.transform.replace(/translateY\\(([-0-9.]+)px\\)/,'$1')) || 0;
-  const nextY = currentY + dy;
-  el.style.transform = `translateY(${nextY}px)`;
-
-  // posizione del centro per decidere dove mettere la placeholder
-  const center = el.offsetTop + nextY + el.offsetHeight/2;
-
-  let targetIndex = Array.from(stepsWrap.children).indexOf(drag.ph);
-  const kids = Array.from(stepsWrap.children).filter(n=>n!==el);
-  for(let k=0;k<kids.length;k++){
-    const n = kids[k];
-    const mid = n.offsetTop + n.offsetHeight/2;
-    if(center < mid){ targetIndex = k; break; } else { targetIndex = k+1; }
-  }
-  if(stepsWrap.children[targetIndex] !== drag.ph){
-    stepsWrap.insertBefore(drag.ph, stepsWrap.children[targetIndex] || null);
-  }
-}
-
-function endDrag(){
-  if(!drag.active) return;
-
-  const from = drag.startIndex;
-  const finalIndex = [...stepsWrap.children].indexOf(drag.ph);
-
-  // rimetti l’elemento al posto della placeholder
-  stepsWrap.insertBefore(drag.el, drag.ph);
-
-  // reset stile
-  const el = drag.el;
-  el.style.position=''; el.style.top=''; el.style.left=''; el.style.width='';
-  el.style.transform=''; el.style.pointerEvents='';
-  el.classList.remove('drag-ghost');
-  drag.ph.remove();
-
-  // aggiorna stato (“fa spazio” definitivo)
-  const to = finalIndex > from ? finalIndex - 1 : finalIndex;
-  const [moved] = steps.splice(from,1);
-  steps.splice(to,0,moved);
-
-  drag = { active:false, el:null, startPageY:0, startIndex:0, ph:null, baseTop:0 };
-  refreshSteps();
-}
 
 /* ------- BeanTag drawing (esagono/dotcode-like o tua variante attuale) ------- */
 async function drawBeanTag(payloadKey) {
