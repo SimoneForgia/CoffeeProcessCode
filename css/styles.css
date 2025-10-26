@@ -535,5 +535,7 @@ input.is-missing{
   background-image: none !important;
 }
 
-
+input.is-missing::placeholder {
+  color: rgba(255,255,255,0.65);   /* un po’ più chiaro per contrastare il rosso */
+}
 
