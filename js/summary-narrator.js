@@ -1,19 +1,26 @@
 // js/summary-narrator.js
 // Prose summary from ?cpc= and ?opt= only.
-// - Subtypes in prose (no parentheses)
-// - Natural subjects per step + "first" on the very first step
-// - Omits negatives: addition=nothing, thermal=no, contactDuringDrying=no
-// - "Lastly," only if total steps >= 3
+// - First step: "This coffee ... first ..."
+// - Subjects: before depulping -> cherries; after depulping -> beans (for D/H), otherwise coffee
+// - Subtypes in prose (no parentheses). For Washing:
+//     WR => "rinsed with water" (no 'washed')
+//     WK => "manually washed with the Kenyan process"
+//     WM => "washed using mechanical demucilagers"
+// - Negatives omitted (addition=nothing, thermal=no, contactDuringDrying=no)
+// - °C without a space (e.g., 18°C)
+// - Connectors: "then/next/subsequently" used **inline** ("was then ..."),
+//               "After that," and "Lastly," stay **leading** (start of sentence).
+// - "Lastly," only if total steps >= 3.
 
 import { SUB_LABELS, $ } from './common.js';
 
 /* ========= WORDS ========= */
 const WORDS = {
-  then:    'Then,',
-  after:   'After that,',
-  next:    'Next,',
-  subseq:  'Subsequently,',
-  lastly:  'Lastly,',
+  then:   'then',
+  next:   'next',
+  subseq: 'subsequently',
+  after:  'After that,',
+  lastly: 'Lastly,',
 
   floated:   'floated in water',
   depulped:  'depulped',
@@ -77,15 +84,45 @@ function normalize(cpc, optB64) {
   return steps.map((s,i)=>({ ...s, extras: extrasByIndex[i] || {} }));
 }
 
-/* ========= subjects per step ========= */
-function subjectFor(main) {
-  // L (floating) → cherries; D (drying) & H (hulling) → beans; others → coffee/it
-  switch (main) {
-    case 'L': return { np: 'the cherries', be: 'were' };
-    case 'D': return { np: 'the beans',    be: 'were' };
-    case 'H': return { np: 'the beans',    be: 'were' }; // wanted: "the beans were wet hulled"
-    default:  return { np: 'the coffee',   be: 'was'  }; // P,F,W,R defaults
+/* ========= subject selection =========
+   Rule:
+   - First sentence: "This coffee"
+   - Before the FIRST Depulping (P): prefer "the cherries"
+   - After (or at) the FIRST Depulping:
+       * Drying (D) or Hulling (H) -> "the beans"
+       * otherwise -> "the coffee"
+   Articles are lowercase unless they start the sentence (handled by capFirst).
+*/
+function computeDepulpIndex(steps) {
+  const idx = steps.findIndex(s => s.main === 'P');
+  return idx < 0 ? Number.POSITIVE_INFINITY : idx;
+}
+function subjectFor(i, step, depulpIdx) {
+  if (i === 0) return { np: 'this coffee', be: 'was', forceCap: true }; // "This coffee"
+  if (i < depulpIdx) return { np: 'the cherries', be: 'were' };
+  if (step.main === 'D' || step.main === 'H') return { np: 'the beans', be: 'were' };
+  return { np: 'the coffee', be: 'was' };
+}
+
+/* ========= connector placement =========
+   Returns {lead: string|null, inline: string|null}
+   - inline adverbs: then / next / subsequently
+   - leading: After that, / Lastly,
+*/
+function connectorPlacement(i, total, useLastly) {
+  if (i === 0) return { lead: null, inline: null };
+  const rot = ['then', 'after', 'next', 'subseq']; // cycle
+  const key = rot[(i - 1) % rot.length];
+
+  // Last sentence rule
+  if (i === total - 1 && useLastly && total >= 3) {
+    return { lead: WORDS.lastly, inline: null };
   }
+
+  if (key === 'after') return { lead: WORDS.after, inline: null };
+  if (key === 'then')  return { lead: null, inline: WORDS.then };
+  if (key === 'next')  return { lead: null, inline: WORDS.next };
+  return { lead: null, inline: WORDS.subseq }; // 'subsequently'
 }
 
 /* ========= helpers / formatters ========= */
@@ -99,8 +136,7 @@ const fmt = {
   },
   temperature(ex) {
     if (!ex.T) return '';
-    // no space before °C
-    return `${WORDS.at} ${ex.T}°C`;
+    return `${WORDS.at} ${ex.T}°C`; // no space before °C
   },
   vessel(ex) {
     if (!ex.Ct || !VESSEL[ex.Ct]) return '';
@@ -135,22 +171,20 @@ const fmt = {
     const kind = (ex.CDK || '').trim().toLowerCase();
     return kind ? `${WORDS.contactTxt} (${kind})` : WORDS.contactTxt;
   },
-  // subtype → prose (no parentheses); tailored for natural English
   subtypeProse(main, sub) {
     if (!sub) return '';
     const key = (main||'') + (sub||'');
     const label = SUB_LABELS[key] || SUB_LABELS[sub] || '';
     if (!label) return '';
-
     switch (key) {
       // Fermentation
       case 'FA': return 'under aerobic conditions';
       case 'FN': return 'under anaerobic conditions';
       case 'FC': return 'with carbonic maceration';
       case 'FI': return 'by immersion';
-      // Washing (WR must be a clean sentence part, not "washed rinsed…")
+      // Washing (special handling in template)
       case 'WM': return 'using mechanical demucilagers';
-      case 'WK': return 'manually with the Kenyan process';
+      case 'WK': return 'manually washed with the Kenyan process';
       case 'WR': return 'rinsed with water';
       // Drying
       case 'DR': return 'on raised beds';
@@ -161,59 +195,51 @@ const fmt = {
       case 'RP': return 'in parchment';
       // Hulling
       case 'HW': return 'wet hulled';
-      case 'HD': return 'hulled'; // treat "Dry" as the default; no adjective
+      case 'HD': return 'hulled';
       default:   return label.toLowerCase();
     }
   }
 };
 
-/* ========= connectors ========= */
-function connector(index, total, useLastly) {
-  if (index === 0) return ''; // first sentence handled with "first" after was/were
-  if (index === total - 1 && useLastly && total >= 3) return WORDS.lastly;
-  const rot = [WORDS.then, WORDS.after, WORDS.next, WORDS.subseq];
-  return rot[(index - 1) % rot.length];
-}
-
-/* ========= utilities ========= */
+/* ========= small utils ========= */
 function capFirst(str){ return str ? str[0].toUpperCase()+str.slice(1) : str; }
 function end(arr){ return arr.join(' ') + '.'; }
 
 /* ========= templates ========= */
 const TPL = {
-  // L — Floating
   L(step, ctx) {
-    const s = subjectFor('L');
+    const { np, be, forceCap } = ctx.subject;
     const parts = [];
-    if (ctx.conn) parts.push(ctx.conn);
-    // "The cherries were first floated in water."
+    if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
-    parts.push(capFirst(`${s.np} ${s.be}${first} ${WORDS.floated}`));
+    const inline = ctx.inline ? ` ${ctx.inline}` : '';
+    const sent = `${np} ${be}${first}${inline} ${WORDS.floated}`;
+    parts.push(forceCap ? capFirst(sent) : capFirst(sent));
     return end(parts);
   },
 
-  // P — Depulping
   P(step, ctx) {
-    const s = subjectFor('P');
+    const { np, be, forceCap } = ctx.subject;
     const parts = [];
-    if (ctx.conn) parts.push(ctx.conn);
+    if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
-    let sentence = `${s.np} ${s.be}${first} ${WORDS.depulped}`;
+    const inline = ctx.inline ? ` ${ctx.inline}` : '';
+    let sent = `${np} ${be}${first}${inline} ${WORDS.depulped}`;
     const mp = fmt.mucilagePct(step.extras);
-    if (mp) sentence += `, ${mp}`;
-    parts.push(capFirst(sentence));
+    if (mp) sent += `, ${mp}`;
+    parts.push(forceCap ? capFirst(sent) : capFirst(sent));
     return end(parts);
   },
 
-  // F — Fermentation
   F(step, ctx) {
-    const s = subjectFor('F');
+    const { np, be, forceCap } = ctx.subject;
     const parts = [];
-    if (ctx.conn) parts.push(ctx.conn);
+    if (ctx.lead) parts.push(ctx.lead);
+    const first = ctx.isFirst ? ' first' : '';
+    const inline = ctx.inline ? ` ${ctx.inline}` : '';
 
     const chunks = [];
-    const first = ctx.isFirst ? ' first' : '';
-    chunks.push(`${s.np} ${s.be}${first} ${WORDS.fermented}`);
+    chunks.push(`${np} ${be}${first}${inline} ${WORDS.fermented}`);
 
     const sub = fmt.subtypeProse(step.main, step.sub);
     if (sub) chunks.push(sub);
@@ -232,38 +258,49 @@ const TPL = {
 
     if (step.extras.Th === 'yes') chunks.push(`${WORDS.with} a thermal shock`);
 
-    parts.push(capFirst(chunks.join(' ')));
+    const sent = chunks.join(' ');
+    parts.push(forceCap ? capFirst(sent) : capFirst(sent));
     return end(parts);
   },
 
-  // W — Washing
   W(step, ctx) {
-    const s = subjectFor('W');
+    const { np, be, forceCap } = ctx.subject;
     const parts = [];
-    if (ctx.conn) parts.push(ctx.conn);
+    if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
+    const inline = ctx.inline ? ` ${ctx.inline}` : '';
 
     const sub = fmt.subtypeProse(step.main, step.sub);
-    // If WR (rinsed with water), don't say "washed rinsed…": use the rinsed sentence directly.
+    let baseVerb = WORDS.washed; // default
+
+    // Special verbing for WR / WK
     if (sub === 'rinsed with water') {
-      parts.push(capFirst(`${s.np} ${s.be}${first} ${sub}`));
+      const sent = `${np} ${be}${first}${inline} ${sub}`;
+      parts.push(forceCap ? capFirst(sent) : capFirst(sent));
+      return end(parts);
+    }
+    if (sub === 'manually washed with the Kenyan process') {
+      const sent = `${np} ${be}${first}${inline} ${sub}`;
+      parts.push(forceCap ? capFirst(sent) : capFirst(sent));
       return end(parts);
     }
 
-    const base = `${s.np} ${s.be}${first} ${WORDS.washed}`;
-    parts.push(capFirst(sub ? `${base} ${sub}` : base));
+    const sent = sub
+      ? `${np} ${be}${first}${inline} ${baseVerb} ${sub}`
+      : `${np} ${be}${first}${inline} ${baseVerb}`;
+    parts.push(forceCap ? capFirst(sent) : capFirst(sent));
     return end(parts);
   },
 
-  // D — Drying
   D(step, ctx) {
-    const s = subjectFor('D');
+    const { np, be, forceCap } = ctx.subject;
     const parts = [];
-    if (ctx.conn) parts.push(ctx.conn);
+    if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
+    const inline = ctx.inline ? ` ${ctx.inline}` : '';
 
     const chunks = [];
-    chunks.push(`${s.np} ${s.be}${first} ${WORDS.dried}`);
+    chunks.push(`${np} ${be}${first}${inline} ${WORDS.dried}`);
 
     const sub = fmt.subtypeProse(step.main, step.sub);
     if (sub) chunks.push(sub);
@@ -274,19 +311,20 @@ const TPL = {
     const contact = fmt.contact(step.extras);
     if (contact) chunks.push(contact);
 
-    parts.push(capFirst(chunks.join(' ')));
+    const sent = chunks.join(' ');
+    parts.push(forceCap ? capFirst(sent) : capFirst(sent));
     return end(parts);
   },
 
-  // R — Resting
   R(step, ctx) {
-    const s = subjectFor('R');
+    const { np, be, forceCap } = ctx.subject;
     const parts = [];
-    if (ctx.conn) parts.push(ctx.conn);
+    if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
+    const inline = ctx.inline ? ` ${ctx.inline}` : '';
 
     const chunks = [];
-    chunks.push(`${s.np} ${s.be}${first} ${WORDS.rested}`);
+    chunks.push(`${np} ${be}${first}${inline} ${WORDS.rested}`);
 
     const sub = fmt.subtypeProse(step.main, step.sub);
     if (sub) chunks.push(sub);
@@ -294,39 +332,51 @@ const TPL = {
     const dur = fmt.duration(step);
     if (dur) chunks.push(dur);
 
-    parts.push(capFirst(chunks.join(' ')));
+    const sent = chunks.join(' ');
+    parts.push(forceCap ? capFirst(sent) : capFirst(sent));
     return end(parts);
   },
 
-  // H — Hulling
   H(step, ctx) {
-    const s = subjectFor('H');
+    const { np, be, forceCap } = ctx.subject;
     const parts = [];
-    if (ctx.conn) parts.push(ctx.conn);
+    if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
+    const inline = ctx.inline ? ` ${ctx.inline}` : '';
 
-    // subtype prose decides wording; for HD we avoid "dry", for HW we say "wet hulled"
+    // subtypeProse: HW -> "wet hulled", HD -> "hulled" (default)
     const sub = fmt.subtypeProse(step.main, step.sub); // "wet hulled" | "hulled"
-    // Build: "the beans were (first) hulled" or "the beans were (first) wet hulled"
-    const verb = sub || WORDS.hulled; // sub returns "wet hulled" or "hulled"
-    parts.push(capFirst(`${s.np} ${s.be}${first} ${verb}`));
+    const verb = sub || WORDS.hulled;
+
+    const sent = `${np} ${be}${first}${inline} ${verb}`;
+    parts.push(forceCap ? capFirst(sent) : capFirst(sent));
     return end(parts);
   }
 };
 
 /* ========= compose/render ========= */
 function compose(steps, { useLastly }) {
+  const depulpIdx = computeDepulpIndex(steps);
+
   return steps.map((step, i) => {
-    const conn = connector(i, steps.length, useLastly);
+    const place = connectorPlacement(i, steps.length, useLastly);
+    const subject = subjectFor(i, step, depulpIdx);
     const fn = TPL[step.main] || ((st, ctx) => {
-      const s = subjectFor('?');
       const first = ctx.isFirst ? ' first' : '';
-      const start = ctx.conn ? ctx.conn + ' ' : '';
-      return capFirst(`${start}${s.np} ${s.be}${first} processed.`);
+      const inline = ctx.inline ? ` ${ctx.inline}` : '';
+      const start = ctx.lead ? ctx.lead + ' ' : '';
+      const sent = `${subject.np} ${subject.be}${first}${inline} processed`;
+      return capFirst(`${start}${sent}`) + '.';
     });
-    return fn(step, { conn, isFirst: i === 0 });
+    return fn(step, {
+      lead: place.lead,
+      inline: place.inline,
+      isFirst: i === 0,
+      subject
+    });
   });
 }
+
 function render(targetSel, text) {
   const host = $(targetSel) || document.querySelector(targetSel);
   if (!host) return;
