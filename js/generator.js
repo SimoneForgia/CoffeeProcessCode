@@ -88,24 +88,26 @@ function buildStepBlock(i){
 
   // numero “1)” a sinistra, select che riempie, maniglia a destra, X in alto-destra
   card.innerHTML = `
-    <button class="xbtn" title="Remove" aria-label="Remove">×</button>
-    <div class="inline" style="gap:8px;display:grid;grid-template-columns:auto 1fr auto;align-items:end">
-      <div class="mono" aria-hidden="true" style="padding:10px 6px 0 2px">${i+1})</div>
-      <div>
-        <select id="sel-${i}">
-          <option value="">Select an operation…</option>
-          ${CATALOG.map(o=>`<option value="${o.main}" ${s.main===o.main?'selected':''}>${o.label}</option>`).join('')}
-        </select>
-      </div>
-      <button class="handle" title="Reorder" aria-label="Reorder">
-        <svg class="dots" viewBox="0 0 14 22" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          ${Array.from({length:6}).map((_,r)=>Array.from({length:2})
-            .map((_,c)=>`<circle cx="${4+c*6}" cy="${3+r*3.5}" r="1.1" fill="currentColor"/>`).join('')).join('')}
-        </svg>
-      </button>
+  <button class="xbtn" title="Remove" aria-label="Remove">×</button>
+
+  <!-- Titolo dello step sopra al dropdown -->
+  <div class="row">
+    <label class="step-title">Step ${i+1}</label>
+  </div>
+
+  <!-- Riga: solo select a sinistra | handle invisibile a destra -->
+  <div class="inline" style="gap:8px;display:grid;grid-template-columns:1fr auto;align-items:end">
+    <div>
+      <select id="sel-${i}">
+        <option value="">Select an operation…</option>
+        ${CATALOG.map(o=>`<option value="${o.main}" ${s.main===o.main?'selected':''}>${o.label}</option>`).join('')}
+      </select>
     </div>
-    <div id="extras-${i}" class="row"></div>
-  `;
+    <button class="handle" title="Reorder" aria-label="Reorder"></button>
+  </div>
+
+  <div id="extras-${i}" class="row"></div>
+`;
   stepsWrap.appendChild(card);
 
   // remove (consentito anche sui primi due; la validazione sta nel Generate)
