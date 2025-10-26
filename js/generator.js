@@ -299,7 +299,7 @@ add.className = 'row';
 add.innerHTML = `
   <label for="add-${i}">Addition of</label>
   <select id="add-${i}">
-    ${['', 'nothing','mosto','yeast','bacteria','koji','fruits','herbs','spices','flowers','essential','salt','sugar','other']
+    ${['', 'nothing','salt','sugar','mosto','yeast','bacteria','koji','fruits','herbs','spices','flowers','essential','other']
       .map(v=>{
         const lbl = v===''?'Select an option'
                   : v==='nothing'?'Nothing'
