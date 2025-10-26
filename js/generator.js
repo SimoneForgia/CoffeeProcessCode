@@ -122,15 +122,16 @@ card.querySelector('#sel-'+i).addEventListener('change', e=>{
   s.main = main;
   s.sub = '';
   s.hours = '';
-  if (!s.unit) s.unit = 'h';                 // ← se assente, default “h” (nessuna eccezione)
+  if (!s.unit) s.unit = 'h';
   s.mucilagePct = '';
   s.extras = {
-    container:'', addition:'', additionKind:'', thermal:'no', temp:'', ph:'',
-    contactDuringDrying:'', contactKind:''
+    container:'', addition:'', additionKind:'', thermal:'', temp:'', ph:'',
+    contactDuringDrying:'', contactKind:'', unitTemp: s.extras?.unitTemp || 'C'
   };
 
   renderExtras(i, cfg, s); setRail();
 });
+
 
 
 
@@ -263,15 +264,17 @@ swT.addEventListener('click', () => {
 
     
     const thermal = document.createElement('div');
-    thermal.className = 'row';
-    thermal.innerHTML = `
-      <label for="th-${i}">Thermal shock</label>
-      <select id="th-${i}">
-        <option value="no"  ${s.extras.thermal==='no'?'selected':''}>No</option>
-        <option value="yes" ${s.extras.thermal==='yes'?'selected':''}>Yes</option>
-      </select>`;
-    host.appendChild(thermal);
-    thermal.querySelector('#th-'+i).addEventListener('change', e => { s.extras.thermal = e.target.value; });
+thermal.className = 'row';
+thermal.innerHTML = `
+  <label for="th-${i}">Thermal shock</label>
+  <select id="th-${i}">
+    <option value="">Select an option</option>
+    <option value="no"  ${s.extras.thermal==='no'?'selected':''}>No</option>
+    <option value="yes" ${s.extras.thermal==='yes'?'selected':''}>Yes</option>
+  </select>`;
+host.appendChild(thermal);
+thermal.querySelector('#th-'+i).addEventListener('change', e => { s.extras.thermal = e.target.value; });
+
     
     const cont = document.createElement('div');
     cont.className = 'row';
@@ -292,36 +295,40 @@ swT.addEventListener('click', () => {
     cont.querySelector('#ct-'+i).addEventListener('change', e => { s.extras.container = e.target.value; });
 
     const add = document.createElement('div');
-    add.className = 'row';
-    add.innerHTML = `
-      <label for="add-${i}">Addition of</label>
-      <select id="add-${i}">
-        ${['nothing','mosto','yeast','bacteria','koji','fruits','herbs','spices','flowers','essential','other'].map(v=>{
-          const lbl = v==='nothing'?'Nothing':
-                      v==='essential'?'Essential oils':
-                      v[0].toUpperCase()+v.slice(1);
-          return `<option value="${v}" ${s.extras.addition===v?'selected':''}>${lbl}</option>`;
-        }).join('')}
-      </select>`;
-    host.appendChild(add);
-    const addSel = add.querySelector('#add-'+i);
-    addSel.addEventListener('change', e => { s.extras.addition = e.target.value; toggleAddKind(); });
+add.className = 'row';
+add.innerHTML = `
+  <label for="add-${i}">Addition of</label>
+  <select id="add-${i}">
+    ${['', 'nothing','mosto','yeast','bacteria','koji','fruits','herbs','spices','flowers','essential','salt','sugar','other']
+      .map(v=>{
+        const lbl = v===''?'Select an option'
+                  : v==='nothing'?'Nothing'
+                  : v==='essential'?'Essential oils'
+                  : v[0].toUpperCase()+v.slice(1);
+        return `<option value="${v}" ${s.extras.addition===v?'selected':''}>${lbl}</option>`;
+      }).join('')}
+  </select>`;
+host.appendChild(add);
+const addSel = add.querySelector('#add-'+i);
+addSel.addEventListener('change', e => { s.extras.addition = e.target.value; toggleAddKind(); });
 
-    const addKind = document.createElement('div');
-    addKind.className = 'row';
-    addKind.innerHTML = `
-      <label for="addk-${i}">Specify kind</label>
-      <input id="addk-${i}" type="text" placeholder="e.g., mango / lavender / cinnamon" value="${s.extras.additionKind || ''}"/>`;
-    host.appendChild(addKind);
-    const addKindInput = addKind.querySelector('#addk-'+i);
-    addKindInput.addEventListener('input', e => { s.extras.additionKind = e.target.value.trim(); });
+// campo “Specify kind” (solo per voci descrittive)
+const addKind = document.createElement('div');
+addKind.className = 'row';
+addKind.innerHTML = `
+  <label for="addk-${i}">Specify kind</label>
+  <input id="addk-${i}" type="text" placeholder="e.g., mango / lavender / cinnamon" value="${s.extras.additionKind || ''}"/>`;
+host.appendChild(addKind);
+const addKindInput = addKind.querySelector('#addk-'+i);
+addKindInput.addEventListener('input', e => { s.extras.additionKind = e.target.value.trim(); });
 
-    function toggleAddKind(){
-      const need = ['fruits','herbs','spices','flowers','essential','other'].includes(s.extras.addition);
-      addKind.style.display = need ? '' : 'none';
-      if (!need) s.extras.additionKind = '';
-    }
-    toggleAddKind();
+function toggleAddKind(){
+  // “salt” e “sugar” NON richiedono specifica
+  const need = ['fruits','herbs','spices','flowers','essential','other'].includes(s.extras.addition);
+  addKind.style.display = need ? '' : 'none';
+  if (!need) s.extras.additionKind = '';
+}
+toggleAddKind();
   }
 
   // 5) Drying → domanda contatto + kind se yes
@@ -347,11 +354,6 @@ swT.addEventListener('click', () => {
     host.appendChild(k);
     const kInput = k.querySelector('#cdk-'+i);
     kInput.addEventListener('input', e => { s.extras.contactKind = e.target.value.trim(); });
-
-    if (!ex.contactDuringDrying) {
-  flagMissing(`#cd-${steps.indexOf(s)}`);
-  hasErr = true;
-}
 
     function toggleKind(){
       const need = s.extras.contactDuringDrying === 'yes';
@@ -572,26 +574,49 @@ if ((cfg.sub && cfg.sub.length) && s.main !== 'W') {
       }
     }
 
-    // 2) Fermentation: se si seleziona un’aggiunta “descrittiva”, va specificato cosa
-    if (s.main === 'F') {
-      const ex = s.extras || {};
-      const needsKind = ['fruits','herbs','spices','flowers','essential','other'].includes(ex.addition);
-      if (needsKind && !(ex.additionKind && ex.additionKind.trim())) {
-        flagMissing(`#addk-${steps.indexOf(s)}`);
-        hasErr = true;
-      }
-      // NOTE: Temperature e Container sono opzionali → nessuna forzatura
-    }
+    // 2) Fermentation: Addition obbligatoria; Thermal shock obbligatorio;
+// se addition “descrittiva”, richiedi il kind
+if (s.main === 'F') {
+  const ex = s.extras || {};
 
-    // 3) Drying: se “contactDuringDrying = yes”, richiedi il kind
-    if (s.main === 'D') {
-      const ex = s.extras || {};
-      if (ex.contactDuringDrying === 'yes' && !(ex.contactKind && ex.contactKind.trim())) {
-        flagMissing(`#cdk-${steps.indexOf(s)}`);
-        hasErr = true;
-      }
-      // NOTE: Time opzionale → nessuna forzatura su #hrs-*
-    }
+  // Addition deve essere selezionata (no valore vuoto)
+  if (!ex.addition) {
+    flagMissing(`#add-${steps.indexOf(s)}`);
+    hasErr = true;
+  }
+
+  // Thermal shock deve essere selezionato (yes/no)
+  if (!(ex.thermal === 'yes' || ex.thermal === 'no')) {
+    flagMissing(`#th-${steps.indexOf(s)}`);
+    hasErr = true;
+  }
+
+  // Se l’aggiunta è descrittiva, richiedi “Specify kind”
+  const needsKind = ['fruits','herbs','spices','flowers','essential','other'].includes(ex.addition);
+  if (needsKind && !(ex.additionKind && ex.additionKind.trim())) {
+    flagMissing(`#addk-${steps.indexOf(s)}`);
+    hasErr = true;
+  }
+}
+
+    // 3) Drying: la domanda “contactDuringDrying” è OBBLIGATORIA;
+// se “yes”, richiedi “Specify kind”
+if (s.main === 'D') {
+  const ex = s.extras || {};
+
+  // obbliga la risposta yes/no
+  if (!(ex.contactDuringDrying === 'yes' || ex.contactDuringDrying === 'no')) {
+    flagMissing(`#cd-${steps.indexOf(s)}`);
+    hasErr = true;
+  }
+
+  // se yes → specifica obbligatoria
+  if (ex.contactDuringDrying === 'yes' && !(ex.contactKind && ex.contactKind.trim())) {
+    flagMissing(`#cdk-${steps.indexOf(s)}`);
+    hasErr = true;
+  }
+  // Time resta opzionale
+}
 
     // 4) Washing: Subtype opzionale → nessuna forzatura (#sub-*)
     // 5) Depulping: Mucilage left opzionale → nessuna forzatura (#pct-*)
