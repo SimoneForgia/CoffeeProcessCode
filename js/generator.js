@@ -88,25 +88,23 @@ function buildStepBlock(i){
 
   // numero “Step N” sopra al dropdown, X in alto-destra
   card.innerHTML = `
-  <button class="xbtn" title="Remove" aria-label="Remove">×</button>
+    <button class="xbtn" title="Remove" aria-label="Remove">×</button>
 
-  <!-- Titolo dello step sopra al dropdown -->
-  <div class="row">
-    <label class="step-title">Step ${i+1}</label>
-  </div>
+    <!-- Titolo dello step sopra al dropdown -->
+    <div class="row">
+      <label class="step-title">Step ${i+1}</label>
+    </div>
 
-  <!-- Solo il select; nessun handle -->
-  <div class="row">
-    <select id="sel-${i}">
-      <option value="">Select an operation…</option>
-      ${CATALOG.map(o=>`<option value="${o.main}" ${s.main===o.main?'selected':''}>${o.label}</option>`).join('')}
-    </select>
-  </div>
+    <!-- Solo il select; nessun handle -->
+    <div class="row">
+      <select id="sel-${i}">
+        <option value="">Select an operation…</option>
+        ${CATALOG.map(o=>`<option value="${o.main}" ${s.main===o.main?'selected':''}>${o.label}</option>`).join('')}
+      </select>
+    </div>
 
-  <div id="extras-${i}" class="row"></div>
-`;
-v id="extras-${i}" class="row"></div>
-`;
+    <div id="extras-${i}" class="row"></div>
+  `;
   stepsWrap.appendChild(card);
 
   // remove (consentito anche sui primi due; la validazione sta nel Generate)
@@ -116,26 +114,27 @@ v id="extras-${i}" class="row"></div>
   });
 
   // change main
-card.querySelector('#sel-'+i).addEventListener('change', e=>{
-  const main = e.target.value;
-  const cfg = CATALOG.find(x=>x.main===main) || {duration:false,extras:false,sub:[]};
+  card.querySelector('#sel-'+i).addEventListener('change', e=>{
+    const main = e.target.value;
+    const cfg = CATALOG.find(x=>x.main===main) || {duration:false,extras:false,sub:[]};
 
-  s.main = main;
-  s.sub = '';
-  s.hours = '';
-  if (!s.unit) s.unit = 'h';
-  s.mucilagePct = '';
-  s.extras = {
-    container:'', addition:'', additionKind:'', thermal:'', temp:'', ph:'',
-    contactDuringDrying:'', contactKind:'', unitTemp: s.extras?.unitTemp || 'C'
-  };
+    s.main = main;
+    s.sub = '';
+    s.hours = '';
+    if (!s.unit) s.unit = 'h';
+    s.mucilagePct = '';
+    s.extras = {
+      container:'', addition:'', additionKind:'', thermal:'', temp:'', ph:'',
+      contactDuringDrying:'', contactKind:'', unitTemp: s.extras?.unitTemp || 'C'
+    };
 
-  renderExtras(i, cfg, s); setRail();
-});
-
+    renderExtras(i, cfg, s); 
+    setRail();
+  });
 
   renderExtras(i, CATALOG.find(x=>x.main===s.main)||{duration:false,extras:false,sub:[]}, s);
 }
+
 
 function renderExtras(i, cfg, s) {
   const host = document.getElementById('extras-' + i);
@@ -558,7 +557,7 @@ if (s.main === 'D') {
 });
 
 // Download unico con menu (se presente)
-const dlMenu = document.getElementById('dlMenu');
+const dlMenu = document.getElementById('downloadMenu');
 document.getElementById('downloadBtn')?.addEventListener('click', ()=>{ dlMenu?.classList.toggle('open'); });
 document.getElementById('dlPng')?.addEventListener('click', (e)=>{ e.preventDefault(); const link=document.createElement('a'); link.href=canvas.toDataURL('image/png'); link.download='BeanTag.png'; document.body.appendChild(link); link.click(); link.remove(); dlMenu?.classList.remove('open'); });
 document.getElementById('dlSvg')?.addEventListener('click', async (e)=>{ e.preventDefault(); const cpc=cpcEl.textContent.trim(); const opt = buildOpt(); const svg=await exportSVG((cpc||'')+'|'+(opt?JSON.stringify(opt):'')); const blob=new Blob([svg],{type:'image/svg+xml'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='BeanTag.svg'; document.body.appendChild(a); a.click(); a.remove(); dlMenu?.classList.remove('open'); });
