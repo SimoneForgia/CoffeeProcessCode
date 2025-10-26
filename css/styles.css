@@ -100,14 +100,6 @@ details summary::-webkit-details-marker{display:none}
   font-weight:700;
 }
 
-/* Maniglia */
-.step .handle{
-  width:34px;height:46px;border:1px dashed var(--line);
-  border-radius:10px;display:grid;place-items:center;
-  color:var(--fg);cursor:grab;user-select:none;touch-action:none;
-}
-.step .handle:active{cursor:grabbing}
-
 /* BeanTag: titolo sopra, box sotto; nascosto finché non è .open */
 #beanPanel{display:none}
 #beanPanel.open{display:flex; flex-direction:column; gap:8px}
@@ -154,25 +146,6 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .inline{display:flex;gap:10px;align-items:center}
 .right{margin-left:auto}
-
-/* Maniglia (drag) piccola a destra, non ruba spazio */
-.handle{
-  width:34px;
-  height:46px;
-  display:grid;
-  place-items:center;
-  color:var(--fg);
-  cursor:grab;
-  user-select:none;
-  touch-action:none;
-  background:transparent;   /* 🔹 niente sfondo */
-  border:none;              /* 🔹 niente bordo */
-}
-.handle:active{
-  cursor:grabbing;
-}
-.handle:active{cursor:grabbing}
-.dots{height:22px;opacity:.9;margin-top:0;}
 
 /* X compatta in alto-destra */
 /* Bottone chiusura, con X disegnata via CSS (niente font) */
@@ -227,10 +200,6 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)
     height: 24px;
   }
 }
-
-
-/* Ghost durante drag */
-.step.drag-ghost{opacity:.9;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99}
 
 /* BeanTag area */
 
