@@ -164,8 +164,8 @@ const fmt = {
       case 'FC': return 'with carbonic maceration';
       case 'FI': return 'by immersion';
       // Washing
-      case 'WM': return 'using mechanical demucilagers';
-      case 'WK': return 'manually washed with the Kenyan process';
+      case 'WM': return 'using mechanical demucilagers to remove the mucilage left';
+      case 'WK': return 'manually washed with the Kenyan process to remove the mucilage left';
       case 'WR': return 'rinsed with water';
       // Drying
       case 'DR': return 'on raised beds';
