@@ -30,7 +30,7 @@ const WORDS = {
   with:       'with',
   and:       'and',
   using:      'using',
-  contactTxt: 'in contact with other products'
+  contactTxt: 'in contact with external products'
 };
 
 const VESSEL = {
