@@ -388,21 +388,22 @@ function compose(steps, { useLastly, reasons }) {
       !/\sand\s[^.]*\.$/i.test(out[out.length - 1])
     ) {
       const prev = out.pop().replace(/\.\s*$/, '');
-      let curClause = cur.text.trim().replace(/\.$/, '');
+let curClause = cur.text.trim().replace(/\.$/, '');
 
-      // If the current starts with the same subject as previous, replace with pronoun
-      const prevMeta = raw[i-1];
-      if (prevMeta && prevMeta.subjKey === cur.subjKey) {
-        // Replace leading "[this|the] (coffee|coffee beans|beans|coffee cherries|cherries) was/were "
-        curClause = curClause.replace(
-          /^(?:After that,\s+|Next,\s+|Lastly,\s+)?(?:(?:this|the)\s+)?(coffee beans|beans|coffee cherries|cherries|coffee)\s+(was|were)\s+/i,
-          (_, noun, verb) => (/(beans|cherries)/i.test(noun) ? 'they were ' : 'it was ')
-        );
-        // Lowercase first letter just in case
-        curClause = curClause.replace(/^[A-Z]/, c => c.toLowerCase());
-      }
+// Se il soggetto della seconda frase è identico alla prima, sostituisci con pronome
+const prevMeta = raw[i - 1];
+if (prevMeta && prevMeta.subjKey === cur.subjKey) {
+  curClause = curClause.replace(
+    /^(?:After that,\s+|Next,\s+|Lastly,\s+)?(?:(?:this|the)\s+)?(coffee beans|beans|coffee cherries|cherries|coffee)\s+(was|were)\s+/i,
+    (_, noun) => (/(beans|cherries)/i.test(noun) ? 'they were ' : 'it was ')
+  );
+}
 
-      out.push(prev + ' and ' + curClause + '.');
+// **Nuovo**: dopo l’unione con "and", forza sempre la minuscola iniziale
+curClause = curClause.replace(/^\s*([A-Z])/, (_, c) => c.toLowerCase());
+
+out.push(prev + ' and ' + curClause + '.');
+
       usedAndLast = true;
     } else {
       out.push(cur.text);
