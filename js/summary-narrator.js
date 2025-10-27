@@ -238,12 +238,13 @@ const TPL = {
   const chunks = [];
   chunks.push(`${np} ${be}${first}${inline} ${WORDS.depulped}`);
 
-  // Reason subito dopo lo step (prima di eventuale mucilage)
+  // Reason subito dopo lo step
   const reason = fmt.reason(ctx.reasonText);
   if (reason) chunks.push(reason);
 
+  // Mucilage percentage, preceduta da virgola se presente
   const mp = fmt.mucilagePct(step.extras);
-  if (mp) chunks.push(mp);
+  if (mp) chunks[chunks.length - 1] += `, ${mp}`;
 
   const sent = chunks.join(' ');
   parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
