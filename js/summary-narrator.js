@@ -228,20 +228,26 @@ const TPL = {
   },
 
   P(step, ctx) {
-    const { np, be } = ctx.subject;
-    const parts = [];
-    if (ctx.lead) parts.push(ctx.lead);
-    const first = ctx.isFirst ? ' first' : '';
-    theInline: {
-      const inline = ctx.inline ? ` ${ctx.inline}` : '';
-      const chunks = [`${np} ${be}${first}${inline} ${WORDS.depulped}`];
-      const mp = fmt.mucilagePct(step.extras); if (mp) chunks[chunks.length-1] += `, ${mp}`;
-      const reason = fmt.reason(ctx.reasonText); if (reason) chunks.push(reason);
-      const sent = chunks.join(' ');
-      parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
-    }
-    return end(parts);
-  },
+  const { np, be } = ctx.subject;
+  const parts = [];
+  if (ctx.lead) parts.push(ctx.lead);
+  const first = ctx.isFirst ? ' first' : '';
+  const inline = ctx.inline ? ` ${ctx.inline}` : '';
+
+  const chunks = [];
+  chunks.push(`${np} ${be}${first}${inline} ${WORDS.depulped}`);
+
+  // Reason subito dopo lo step (prima di eventuale mucilage)
+  const reason = fmt.reason(ctx.reasonText);
+  if (reason) chunks.push(reason);
+
+  const mp = fmt.mucilagePct(step.extras);
+  if (mp) chunks.push(mp);
+
+  const sent = chunks.join(' ');
+  parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
+  return end(parts);
+},
 
   F(step, ctx) {
     const { np, be } = ctx.subject;
