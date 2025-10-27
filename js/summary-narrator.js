@@ -1,5 +1,7 @@
 // js/summary-narrator.js
 // Prose summary from ?cpc= and ?opt= only (EN).
+// Adds per-operation "reason" keyed by words: floated, depulped, fermented, washed, dried, rested, hulled.
+// If missing, reason is omitted. Init { reasons: {...} } or window.CPC_REASONS.
 
 import { SUB_LABELS, $ } from './common.js';
 
@@ -73,11 +75,7 @@ function normalize(cpc, optB64) {
   return steps.map((s,i)=>({ ...s, extras: extrasByIndex[i] || {} }));
 }
 
-/* ===== subject logic =====
-   1) First sentence: "this coffee"
-   2) Before first Depulping: alternate "the coffee cherries" / "the cherries"
-   3) At/after first Depulping: for ALL steps alternate "the coffee" / "the coffee beans"
-*/
+/* ===== subject logic ===== */
 function firstDepulpIndex(steps) {
   const idx = steps.findIndex(s => s.main === 'P');
   return idx < 0 ? Number.POSITIVE_INFINITY : idx;
@@ -85,7 +83,7 @@ function firstDepulpIndex(steps) {
 function makeSubjectPicker(steps) {
   const depIdx = firstDepulpIndex(steps);
   let preCherryToggle = 0;
-  let postToggle = 0; // alternates coffee vs coffee beans after depulp
+  let postToggle = 0;
   return function pick(i) {
     if (i === 0) return { np: 'this coffee', be: 'was', forceCap: true };
     if (i < depIdx) {
@@ -97,11 +95,7 @@ function makeSubjectPicker(steps) {
   };
 }
 
-/* ===== connectors =====
-   - Next, After that, Lastly, are LEADING
-   - then, subsequently are INLINE (…was then…, …was subsequently…)
-   - We also return andFlag (eligible to connect with 'and')
-*/
+/* ===== connectors ===== */
 function connectorPlacement(i, total, useLastly) {
   if (i === 0) return { lead: null, inline: null, andFlag: false };
   if (i === total - 1 && useLastly && total >= 3) {
@@ -126,7 +120,7 @@ const fmt = {
   },
   temperature(ex) {
     if (!ex.T) return '';
-    return `${WORDS.at} ${ex.T}°C`;
+    return `${WORDS.at} ${ex.T}°C`; // no space
   },
   vessel(ex) {
     if (!ex.Ct || !VESSEL[ex.Ct]) return '';
@@ -164,22 +158,35 @@ const fmt = {
     const label = SUB_LABELS[key] || SUB_LABELS[sub] || '';
     if (!label) return '';
     switch (key) {
+      // Fermentation
       case 'FA': return 'under aerobic conditions';
       case 'FN': return 'under anaerobic conditions';
       case 'FC': return 'with carbonic maceration';
       case 'FI': return 'by immersion';
-      case 'WM': return 'using mechanical demucilagers';
-      case 'WK': return 'manually washed with the Kenyan process';
+      // Washing
+      case 'WM': return 'using mechanical demucilagers to remove the mucilage left';
+      case 'WK': return 'manually washed with the Kenyan process to remove the mucilage left';
       case 'WR': return 'rinsed with water';
+      // Drying
       case 'DR': return 'on raised beds';
       case 'DP': return 'on patios';
       case 'DM': return 'in a mechanical dryer';
+      // Resting
       case 'RC': return 'in cherries';
       case 'RP': return 'in parchment';
+      // Hulling
       case 'HW': return 'wet hulled';
       case 'HD': return 'hulled';
       default:   return label.toLowerCase();
     }
+  },
+  // Reason: if starts with "to/for/because" keep, otherwise prefix "to"
+  reason(text) {
+    if (!text) return '';
+    const t = String(text).trim();
+    if (!t) return '';
+    if (/^(to|for|because)\b/i.test(t)) return t.replace(/\.$/, '');
+    return 'to ' + t.replace(/\.$/, '');
   }
 };
 
@@ -188,7 +195,21 @@ function capFirst(str){ return str ? str[0].toUpperCase()+str.slice(1) : str; }
 function startLower(str){ return str ? str[0].toLowerCase()+str.slice(1) : str; }
 function end(arr){ return arr.join(' ') + '.'; }
 
-/* ===== templates (no 'and' here; merging happens later) ===== */
+/* ===== map main->word key for reasons ===== */
+function opWordFor(step){
+  switch(step.main){
+    case 'L': return 'floated';
+    case 'P': return 'depulped';
+    case 'F': return 'fermented';
+    case 'W': return 'washed';   // includes WR/WK special phrasing
+    case 'D': return 'dried';
+    case 'R': return 'rested';
+    case 'H': return 'hulled';
+    default:  return '';
+  }
+}
+
+/* ===== templates (no 'and' merge here) ===== */
 const TPL = {
   L(step, ctx) {
     const { np, be } = ctx.subject;
@@ -196,117 +217,170 @@ const TPL = {
     if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
     const inline = ctx.inline ? ` ${ctx.inline}` : '';
-    const sent = `${np} ${be}${first}${inline} ${WORDS.floated}`;
+    const chunks = [`${np} ${be}${first}${inline} ${WORDS.floated}`];
+
+    const reason = fmt.reason(ctx.reasonText);
+    if (reason) chunks.push(reason);
+
+    const sent = chunks.join(' ');
     parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
     return end(parts);
   },
+
   P(step, ctx) {
     const { np, be } = ctx.subject;
     const parts = [];
     if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
     const inline = ctx.inline ? ` ${ctx.inline}` : '';
-    let sent = `${np} ${be}${first}${inline} ${WORDS.depulped}`;
-    const mp = fmt.mucilagePct(step.extras);
-    if (mp) sent += `, ${mp}`;
+    const chunks = [`${np} ${be}${first}${inline} ${WORDS.depulped}`];
+
+    const mp = fmt.mucilagePct(step.extras); if (mp) chunks[chunks.length-1] += `, ${mp}`;
+
+    const reason = fmt.reason(ctx.reasonText);
+    if (reason) chunks.push(reason);
+
+    const sent = chunks.join(' ');
     parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
     return end(parts);
   },
+
   F(step, ctx) {
     const { np, be } = ctx.subject;
     const parts = [];
     if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
     const inline = ctx.inline ? ` ${ctx.inline}` : '';
+
     const chunks = [];
     chunks.push(`${np} ${be}${first}${inline} ${WORDS.fermented}`);
+
     const sub = fmt.subtypeProse(step.main, step.sub); if (sub) chunks.push(sub);
     const dur = fmt.duration(step); if (dur) chunks.push(dur);
     const vess = fmt.vessel(step.extras); if (vess) chunks.push(vess);
     const temp = fmt.temperature(step.extras); if (temp) chunks.push(temp);
     const add = fmt.addition(step.extras); if (add) chunks.push(add);
     if (step.extras.Th === 'yes') chunks.push(`${WORDS.with} a thermal shock`);
+
+    const reason = fmt.reason(ctx.reasonText);
+    if (reason) chunks.push(reason);
+
     const sent = chunks.join(' ');
     parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
     return end(parts);
   },
+
   W(step, ctx) {
     const { np, be } = ctx.subject;
     const parts = [];
     if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
     const inline = ctx.inline ? ` ${ctx.inline}` : '';
+
+    const chunks = [];
     const sub = fmt.subtypeProse(step.main, step.sub);
+
     if (sub === 'rinsed with water' || sub === 'manually washed with the Kenyan process') {
-      const sent = `${np} ${be}${first}${inline} ${sub}`;
-      parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
-      return end(parts);
+      chunks.push(`${np} ${be}${first}${inline} ${sub}`);
+    } else {
+      const baseVerb = WORDS.washed;
+      chunks.push(sub ? `${np} ${be}${first}${inline} ${baseVerb} ${sub}`
+                      : `${np} ${be}${first}${inline} ${baseVerb}`);
     }
-    const baseVerb = WORDS.washed;
-    const sent = sub ? `${np} ${be}${first}${inline} ${baseVerb} ${sub}` : `${np} ${be}${first}${inline} ${baseVerb}`;
+
+    const reason = fmt.reason(ctx.reasonText);
+    if (reason) chunks.push(reason);
+
+    const sent = chunks.join(' ');
     parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
     return end(parts);
   },
+
   D(step, ctx) {
     const { np, be } = ctx.subject;
     const parts = [];
     if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
     const inline = ctx.inline ? ` ${ctx.inline}` : '';
+
     const chunks = [];
     chunks.push(`${np} ${be}${first}${inline} ${WORDS.dried}`);
     const sub = fmt.subtypeProse(step.main, step.sub); if (sub) chunks.push(sub);
     const dur = fmt.duration(step); if (dur) chunks.push(dur);
     const contact = fmt.contact(step.extras); if (contact) chunks.push(contact);
+
+    const reason = fmt.reason(ctx.reasonText);
+    if (reason) chunks.push(reason);
+
     const sent = chunks.join(' ');
     parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
     return end(parts);
   },
+
   R(step, ctx) {
     const { np, be } = ctx.subject;
     const parts = [];
     if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
     const inline = ctx.inline ? ` ${ctx.inline}` : '';
+
     const chunks = [];
     chunks.push(`${np} ${be}${first}${inline} ${WORDS.rested}`);
     const sub = fmt.subtypeProse(step.main, step.sub); if (sub) chunks.push(sub);
     const dur = fmt.duration(step); if (dur) chunks.push(dur);
+
+    const reason = fmt.reason(ctx.reasonText);
+    if (reason) chunks.push(reason);
+
     const sent = chunks.join(' ');
     parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
     return end(parts);
   },
+
   H(step, ctx) {
     const { np, be } = ctx.subject;
     const parts = [];
     if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
     const inline = ctx.inline ? ` ${ctx.inline}` : '';
+
     const sub = fmt.subtypeProse(step.main, step.sub); // "wet hulled" | "hulled"
     const verb = sub || WORDS.hulled;
-    const sent = `${np} ${be}${first}${inline} ${verb}`;
+
+    const chunks = [`${np} ${be}${first}${inline} ${verb}`];
+
+    const reason = fmt.reason(ctx.reasonText);
+    if (reason) chunks.push(reason);
+
+    const sent = chunks.join(' ');
     parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
     return end(parts);
   }
 };
 
 /* ===== compose + AND-MERGE ===== */
-function compose(steps, { useLastly }) {
+function compose(steps, { useLastly, reasons }) {
   const pickSubject = makeSubjectPicker(steps);
   const raw = steps.map((step, i) => {
     const place = connectorPlacement(i, steps.length, useLastly);
     const subject = pickSubject(i, step);
+    const reasonText = pickReasonByWord(step, i, steps, reasons);
     const tpl = TPL[step.main] || ((st, ctx) => {
       const first = ctx.isFirst ? ' first' : '';
       const inline = ctx.inline ? ` ${ctx.inline}` : '';
-      const start = ctx.lead ? ctx.lead + ' ' : '';
-      const sent = `${subject.np} ${subject.be}${first}${inline} processed`;
-      return (ctx.lead ? startLower(start + sent) : capFirst(start + sent)) + '.';
+      const base = `${ctx.subject.np} ${ctx.subject.be}${first}${inline} processed`;
+      const chunks = [base];
+      const rr = fmt.reason(ctx.reasonText); if (rr) chunks.push(rr);
+      const sent = chunks.join(' ');
+      return (ctx.lead ? startLower(sent) : capFirst(sent)) + '.';
     });
-    return { text: tpl(step, { lead: place.lead, inline: place.inline, isFirst: i === 0, subject }), andCandidate: place.andFlag };
+    return {
+      text: tpl(step, { lead: place.lead, inline: place.inline, isFirst: i === 0, subject, reasonText }),
+      andCandidate: place.andFlag
+    };
   });
 
-  // merge with "and" when eligible:
+  // merge with "and" when eligible
   const out = [];
   let usedAndLast = false;
   for (let i = 0; i < raw.length; i++) {
@@ -315,22 +389,46 @@ function compose(steps, { useLastly }) {
       cur.andCandidate &&
       !usedAndLast &&
       out.length > 0 &&
-      !/\sand\s[^.]*\.$/i.test(out[out.length - 1]) // previous doesn't already end with " and …."
+      !/\sand\s[^.]*\.$/i.test(out[out.length - 1])
     ) {
-      // join with previous: remove trailing ".", lowercase start of current, drop its period
       const prev = out.pop().replace(/\.\s*$/, '');
       const curNoCap = cur.text.trim().replace(/^\s*([A-Z])/, (m,c)=>c.toLowerCase()).replace(/\.$/, '');
       out.push(prev + ' and ' + curNoCap + '.');
       usedAndLast = true;
     } else {
       out.push(cur.text);
-      // if we didn't merge, reset the flag; also avoid toggling when current already contains " and "
       usedAndLast = false;
     }
   }
   return out;
 }
 
+/* ===== reasons picking (by WORD first) ===== */
+function hasWordKeys(obj){
+  const keys = ['floated','depulped','fermented','washed','dried','rested','hulled'];
+  return obj && typeof obj === 'object' && keys.some(k => Object.prototype.hasOwnProperty.call(obj,k));
+}
+function pickReasonByWord(step, i, steps, reasonsOpt){
+  // Source precedence: init.reasons -> window.CPC_REASONS -> none
+  const src = (reasonsOpt && typeof reasonsOpt === 'object') ? reasonsOpt
+    : (typeof window !== 'undefined' ? (window.CPC_REASONS || null) : null);
+  if (!src) return '';
+
+  // 1) word-keyed reasons (preferred)
+  const word = opWordFor(step);
+  if (word && hasWordKeys(src) && src[word]) return src[word];
+
+  // 2) fallback to array / object by index (back-compat)
+  if (Array.isArray(src)) return src[i] || '';
+  const byIndex = src[i] || src[String(i)];
+  if (byIndex) return byIndex;
+
+  // 3) optional token/main keys as last resort
+  const tok = step.main + (step.sub||'') + (step.hours||'') + (step.unit||'');
+  return src[tok] || src[step.main] || '';
+}
+
+/* ===== render & API ===== */
 function render(targetSel, text) {
   const host = $(targetSel) || document.querySelector(targetSel);
   if (!host) return;
@@ -340,9 +438,8 @@ function render(targetSel, text) {
   host.appendChild(p);
 }
 
-/* ===== public API ===== */
 export const SummaryNarrator = {
-  init({ target = '#processSummary', useLastly = true } = {}) {
+  init({ target = '#processSummary', useLastly = true, reasons = null } = {}) {
     const p = new URLSearchParams(location.search);
     const cpc = p.get('cpc') || '';
     const opt = p.get('opt') || '';
@@ -351,7 +448,7 @@ export const SummaryNarrator = {
     const steps = normalize(cpc, opt);
     if (!steps.length) { render(target, 'A process summary will appear once a code is generated.'); return; }
 
-    const sentences = compose(steps, { useLastly });
+    const sentences = compose(steps, { useLastly, reasons });
     render(target, sentences.join(' '));
   }
 };
