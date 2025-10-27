@@ -48,11 +48,21 @@ const STANDALONE_ADDITIONS  = new Set(['salt','sugar','yeast','bacteria','koji',
 function parseCPC(cpc) {
   if (!cpc) return [];
   return cpc.split('.').filter(Boolean).map(tok => {
-    const m = tok.match(/^([A-Z])([A-Z]?)(\d{0,3})([hd])?$/);
-    if (!m) return { raw: tok, main: '?', sub: '', hours: '', unit: '' };
-    return { raw: tok, main: m[1], sub: m[2] || '', hours: m[3] || '', unit: m[4] || '' };
+    // Supporta: L, FI24h, FA24h*, P10%, DP9d*, ecc.
+    const m = tok.match(/^([A-Z])([A-Z]?)(?:(\d{1,3})([hd])|(\d{1,3})%)?(\*)?$/);
+    if (!m) return { raw: tok, main: '?', sub: '', hours: '', unit: '', pct:'', star:false };
+    return {
+      raw: tok,
+      main: m[1],
+      sub:  m[2] || '',
+      hours:m[3] || '',
+      unit: m[4] || '',
+      pct:  m[5] || '',
+      star: !!m[6]
+    };
   });
 }
+
 function parseOPT(optB64) {
   if (!optB64) return {};
   try {
@@ -60,15 +70,22 @@ function parseOPT(optB64) {
     const map = {};
     (json.steps || []).forEach(e => {
       map[e.i] = {
-        MP: e.MP || '', Ct: e.Ct || '',
-        Add: e.Add || '', AddK: (e.AddK || ''),
-        Th: e.Th || '', T: e.T || '', pH: e.pH || '',
-        CD: e.CD || '', CDK: (e.CDK || '')
+        MP: e.MP || '',
+        Ct: e.Ct || '',
+        Add: e.Add || '',
+        AddK: (e.AddK || ''),
+        Th: e.Th || '',
+        T:  e.T  || '',
+        TU: e.TU || 'C',  // <-- unità temperatura
+        pH: e.pH || '',
+        CD: e.CD || '',
+        CDK:(e.CDK||'')
       };
     });
     return map;
   } catch { return {}; }
 }
+
 function normalize(cpc, optB64) {
   const steps = parseCPC(cpc);
   const extrasByIndex = parseOPT(optB64);
@@ -120,9 +137,10 @@ const fmt = {
     return `${WORDS.for} ${n} ${unit}`;
   },
   temperature(ex) {
-    if (!ex.T) return '';
-    return `${WORDS.at} ${ex.T}°C`;
-  },
+  if (!ex.T) return '';
+  const unit = (ex.TU === 'F') ? '°F' : '°C';
+  return `${WORDS.at} ${ex.T}${unit}`;
+},
   vessel(ex) {
     if (!ex.Ct || !VESSEL[ex.Ct]) return '';
     const noun = VESSEL[ex.Ct];
