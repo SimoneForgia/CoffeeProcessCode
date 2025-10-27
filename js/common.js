@@ -106,12 +106,57 @@ export const blankStep = () => ({
 
 export function tokenForStep(s){
   if(!s || !s.main) return '';
+
+  // --- Depulping con percentuale (es. P25%) ---
+  if (s.main === 'P' && s.mucilagePct) {
+    return `${s.main}${s.sub||''}${parseInt(s.mucilagePct,10)}%`;
+  }
+
+  // --- Altri step con durata opzionale/obbligatoria ---
   const HRS = (s.hours!=='' && /^\d{1,3}$/.test(String(s.hours)))
     ? String(parseInt(s.hours,10)) : '';
   const U = (HRS && (s.unit==='h' || s.unit==='d')) ? s.unit : '';
-  return `${s.main}${s.sub||''}${HRS}${U}`; 
+  return `${s.main}${s.sub||''}${HRS}${U}`;
 }
-export function buildCPC(steps){ return steps.map(tokenForStep).filter(Boolean).join('.'); }
+
+
+
+function needsStar(s){
+  if (!s || !s.main) return false;
+  const ex = s.extras || {};
+
+  // Depulping: la percentuale è rappresentata nel codice (P25%), quindi NON attiva lo star
+  if (s.main === 'P') return false;
+
+  // Fermentation: metti * se esistono extra significativi
+  if (s.main === 'F') {
+    const hasTemp = !!ex.temp;
+    const hasContainer = !!ex.container;
+    const hasThermalYes = ex.thermal === 'yes';
+    const hasAddition = !!ex.addition && ex.addition !== 'nothing';
+    return (hasTemp || hasContainer || hasThermalYes || hasAddition);
+  }
+
+  // Drying: metti * se i chicchi sono stati a contatto con qualcosa
+  if (s.main === 'D') {
+    return ex.contactDuringDrying === 'yes';
+  }
+
+  return false;
+}
+
+
+export function buildCPC(steps){
+  return steps
+    .map(s => {
+      const base = tokenForStep(s);
+      if (!base) return '';
+      return needsStar(s) ? (base + '*') : base;
+    })
+    .filter(Boolean)
+    .join('.');
+}
+
 export function safeB64Encode(obj){ return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
 
 export function buildOpt(steps){
@@ -130,7 +175,8 @@ export function buildOpt(steps){
       if (ex.additionKind) payload.AddK= ex.additionKind;
       if (ex.thermal)      payload.Th  = ex.thermal;
       if (ex.temp)         payload.T   = ex.temp;
-      if (ex.ph)           payload.pH  = ex.ph;
+      if (ex.unitTemp)     payload.TU  = ex.unitTemp;  // <-- nuova: C|F
+      if (ex.ph)           payload.pH  = ex.ph;        // opzionale, se già lo usi
     }
 
     // Drying
