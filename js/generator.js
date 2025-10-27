@@ -53,10 +53,33 @@ function clearMissing(){
 
 function tokenForStep(s) {
   if (!s || !s.main) return '';
+
+  // Depulping con percentuale “P25%”
+  if (s.main === 'P' && s.mucilagePct) {
+    return `${s.main}${s.sub || ''}${parseInt(s.mucilagePct,10)}%`;
+  }
+
+  // Durata per gli altri step
   const hrs = (s.hours !== '' && /^\d{1,3}$/.test(String(s.hours)))
     ? String(parseInt(s.hours, 10)) : '';
   const u = (hrs && (s.unit==='h' || s.unit==='d')) ? s.unit : '';
-  return `${s.main}${s.sub || ''}${hrs}${u}`;
+  const base = `${s.main}${s.sub || ''}${hrs}${u}`;
+
+  // Asterisco se ci sono extra NON rappresentati nel token
+  const ex = s.extras || {};
+  let star = false;
+
+  if (s.main === 'F') {
+    const hasTemp = !!ex.temp;
+    const hasContainer = !!ex.container;
+    const hasThermalYes = ex.thermal === 'yes';
+    const hasAddition = !!ex.addition && ex.addition !== 'nothing';
+    star = (hasTemp || hasContainer || hasThermalYes || hasAddition);
+  } else if (s.main === 'D') {
+    star = ex.contactDuringDrying === 'yes';
+  } // P non mette star per la % (già nel codice)
+
+  return star ? (base + '*') : base;
 }
 
 function buildCPC() { return steps.map(tokenForStep).filter(Boolean).join('.'); }
