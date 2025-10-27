@@ -204,9 +204,9 @@ function renderVerticalSummary(cpc){
         liStar.appendChild(codeStar);
 
         const rightStar = document.createElement('div');
-        // titolino conciso, senza descrizione espandibile
-        rightStar.textContent = `* --> ${kw}`;
+        rightStar.textContent = kw;   // niente "* -->"
         liStar.appendChild(rightStar);
+
 
         frag.appendChild(liStar);
       }
