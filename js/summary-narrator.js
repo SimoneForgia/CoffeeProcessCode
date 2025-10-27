@@ -1,7 +1,6 @@
 // js/summary-narrator.js
-// Prose summary from ?cpc= and ?opt= only (EN).
-// Adds per-operation "reason" keyed by words: floated, depulped, fermented, washed, dried, rested, hulled.
-// If missing, reason is omitted. Init { reasons: {...} } or window.CPC_REASONS.
+// Prose summary from ?cpc= and ?opt= only (EN), with reasons keyed by words.
+// Fixes: WK no double "washed"; "and" merge replaces repeated subject with pronoun.
 
 import { SUB_LABELS, $ } from './common.js';
 
@@ -85,13 +84,14 @@ function makeSubjectPicker(steps) {
   let preCherryToggle = 0;
   let postToggle = 0;
   return function pick(i) {
-    if (i === 0) return { np: 'this coffee', be: 'was', forceCap: true };
+    if (i === 0) return { np: 'this coffee', be: 'was', key:'coffee', plural:false };
     if (i < depIdx) {
       const np = (preCherryToggle++ % 2 === 0) ? 'the coffee cherries' : 'the cherries';
-      return { np, be: 'were' };
+      return { np, be:'were', key: np.includes('coffee') ? 'coffee cherries' : 'cherries', plural:true };
     }
     const useCoffee = (postToggle++ % 2 === 0);
-    return useCoffee ? { np: 'the coffee', be: 'was' } : { np: 'the coffee beans', be: 'were' };
+    if (useCoffee) return { np:'the coffee', be:'was', key:'coffee', plural:false };
+    return { np:'the coffee beans', be:'were', key:'coffee beans', plural:true };
   };
 }
 
@@ -120,7 +120,7 @@ const fmt = {
   },
   temperature(ex) {
     if (!ex.T) return '';
-    return `${WORDS.at} ${ex.T}°C`; // no space
+    return `${WORDS.at} ${ex.T}°C`;
   },
   vessel(ex) {
     if (!ex.Ct || !VESSEL[ex.Ct]) return '';
@@ -164,8 +164,8 @@ const fmt = {
       case 'FC': return 'with carbonic maceration';
       case 'FI': return 'by immersion';
       // Washing
-      case 'WM': return 'using mechanical demucilagers to remove the mucilage left';
-      case 'WK': return 'manually washed with the Kenyan process to remove the mucilage left';
+      case 'WM': return 'using mechanical demucilagers';
+      case 'WK': return 'manually washed with the Kenyan process';
       case 'WR': return 'rinsed with water';
       // Drying
       case 'DR': return 'on raised beds';
@@ -195,13 +195,13 @@ function capFirst(str){ return str ? str[0].toUpperCase()+str.slice(1) : str; }
 function startLower(str){ return str ? str[0].toLowerCase()+str.slice(1) : str; }
 function end(arr){ return arr.join(' ') + '.'; }
 
-/* ===== map main->word key for reasons ===== */
+/* ===== op-word mapping for reasons ===== */
 function opWordFor(step){
   switch(step.main){
     case 'L': return 'floated';
     case 'P': return 'depulped';
     case 'F': return 'fermented';
-    case 'W': return 'washed';   // includes WR/WK special phrasing
+    case 'W': return 'washed';
     case 'D': return 'dried';
     case 'R': return 'rested';
     case 'H': return 'hulled';
@@ -209,7 +209,7 @@ function opWordFor(step){
   }
 }
 
-/* ===== templates (no 'and' merge here) ===== */
+/* ===== templates ===== */
 const TPL = {
   L(step, ctx) {
     const { np, be } = ctx.subject;
@@ -232,16 +232,14 @@ const TPL = {
     const parts = [];
     if (ctx.lead) parts.push(ctx.lead);
     const first = ctx.isFirst ? ' first' : '';
-    const inline = ctx.inline ? ` ${ctx.inline}` : '';
-    const chunks = [`${np} ${be}${first}${inline} ${WORDS.depulped}`];
-
-    const mp = fmt.mucilagePct(step.extras); if (mp) chunks[chunks.length-1] += `, ${mp}`;
-
-    const reason = fmt.reason(ctx.reasonText);
-    if (reason) chunks.push(reason);
-
-    const sent = chunks.join(' ');
-    parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
+    theInline: {
+      const inline = ctx.inline ? ` ${ctx.inline}` : '';
+      const chunks = [`${np} ${be}${first}${inline} ${WORDS.depulped}`];
+      const mp = fmt.mucilagePct(step.extras); if (mp) chunks[chunks.length-1] += `, ${mp}`;
+      const reason = fmt.reason(ctx.reasonText); if (reason) chunks.push(reason);
+      const sent = chunks.join(' ');
+      parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
+    }
     return end(parts);
   },
 
@@ -262,8 +260,7 @@ const TPL = {
     const add = fmt.addition(step.extras); if (add) chunks.push(add);
     if (step.extras.Th === 'yes') chunks.push(`${WORDS.with} a thermal shock`);
 
-    const reason = fmt.reason(ctx.reasonText);
-    if (reason) chunks.push(reason);
+    const reason = fmt.reason(ctx.reasonText); if (reason) chunks.push(reason);
 
     const sent = chunks.join(' ');
     parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
@@ -280,7 +277,8 @@ const TPL = {
     const chunks = [];
     const sub = fmt.subtypeProse(step.main, step.sub);
 
-    if (sub === 'rinsed with water' || sub === 'manually washed with the Kenyan process') {
+    // Robust WK/WR handling (no double "washed")
+    if (sub && /^(rinsed with water|manually washed\b)/i.test(sub)) {
       chunks.push(`${np} ${be}${first}${inline} ${sub}`);
     } else {
       const baseVerb = WORDS.washed;
@@ -288,8 +286,7 @@ const TPL = {
                       : `${np} ${be}${first}${inline} ${baseVerb}`);
     }
 
-    const reason = fmt.reason(ctx.reasonText);
-    if (reason) chunks.push(reason);
+    const reason = fmt.reason(ctx.reasonText); if (reason) chunks.push(reason);
 
     const sent = chunks.join(' ');
     parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
@@ -309,8 +306,7 @@ const TPL = {
     const dur = fmt.duration(step); if (dur) chunks.push(dur);
     const contact = fmt.contact(step.extras); if (contact) chunks.push(contact);
 
-    const reason = fmt.reason(ctx.reasonText);
-    if (reason) chunks.push(reason);
+    const reason = fmt.reason(ctx.reasonText); if (reason) chunks.push(reason);
 
     const sent = chunks.join(' ');
     parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
@@ -329,8 +325,7 @@ const TPL = {
     const sub = fmt.subtypeProse(step.main, step.sub); if (sub) chunks.push(sub);
     const dur = fmt.duration(step); if (dur) chunks.push(dur);
 
-    const reason = fmt.reason(ctx.reasonText);
-    if (reason) chunks.push(reason);
+    const reason = fmt.reason(ctx.reasonText); if (reason) chunks.push(reason);
 
     const sent = chunks.join(' ');
     parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
@@ -349,8 +344,7 @@ const TPL = {
 
     const chunks = [`${np} ${be}${first}${inline} ${verb}`];
 
-    const reason = fmt.reason(ctx.reasonText);
-    if (reason) chunks.push(reason);
+    const reason = fmt.reason(ctx.reasonText); if (reason) chunks.push(reason);
 
     const sent = chunks.join(' ');
     parts.push(ctx.lead ? startLower(sent) : capFirst(sent));
@@ -376,11 +370,13 @@ function compose(steps, { useLastly, reasons }) {
     });
     return {
       text: tpl(step, { lead: place.lead, inline: place.inline, isFirst: i === 0, subject, reasonText }),
-      andCandidate: place.andFlag
+      andCandidate: place.andFlag,
+      subjKey: subject.key,
+      subjPlural: subject.plural
     };
   });
 
-  // merge with "and" when eligible
+  // merge with "and" when eligible, replacing repeated subject with pronoun
   const out = [];
   let usedAndLast = false;
   for (let i = 0; i < raw.length; i++) {
@@ -392,8 +388,21 @@ function compose(steps, { useLastly, reasons }) {
       !/\sand\s[^.]*\.$/i.test(out[out.length - 1])
     ) {
       const prev = out.pop().replace(/\.\s*$/, '');
-      const curNoCap = cur.text.trim().replace(/^\s*([A-Z])/, (m,c)=>c.toLowerCase()).replace(/\.$/, '');
-      out.push(prev + ' and ' + curNoCap + '.');
+      let curClause = cur.text.trim().replace(/\.$/, '');
+
+      // If the current starts with the same subject as previous, replace with pronoun
+      const prevMeta = raw[i-1];
+      if (prevMeta && prevMeta.subjKey === cur.subjKey) {
+        // Replace leading "[this|the] (coffee|coffee beans|beans|coffee cherries|cherries) was/were "
+        curClause = curClause.replace(
+          /^(?:After that,\s+|Next,\s+|Lastly,\s+)?(?:(?:this|the)\s+)?(coffee beans|beans|coffee cherries|cherries|coffee)\s+(was|were)\s+/i,
+          (_, noun, verb) => (/(beans|cherries)/i.test(noun) ? 'they were ' : 'it was ')
+        );
+        // Lowercase first letter just in case
+        curClause = curClause.replace(/^[A-Z]/, c => c.toLowerCase());
+      }
+
+      out.push(prev + ' and ' + curClause + '.');
       usedAndLast = true;
     } else {
       out.push(cur.text);
@@ -403,27 +412,19 @@ function compose(steps, { useLastly, reasons }) {
   return out;
 }
 
-/* ===== reasons picking (by WORD first) ===== */
+/* ===== reasons picking ===== */
 function hasWordKeys(obj){
   const keys = ['floated','depulped','fermented','washed','dried','rested','hulled'];
   return obj && typeof obj === 'object' && keys.some(k => Object.prototype.hasOwnProperty.call(obj,k));
 }
 function pickReasonByWord(step, i, steps, reasonsOpt){
-  // Source precedence: init.reasons -> window.CPC_REASONS -> none
   const src = (reasonsOpt && typeof reasonsOpt === 'object') ? reasonsOpt
     : (typeof window !== 'undefined' ? (window.CPC_REASONS || null) : null);
   if (!src) return '';
-
-  // 1) word-keyed reasons (preferred)
   const word = opWordFor(step);
   if (word && hasWordKeys(src) && src[word]) return src[word];
-
-  // 2) fallback to array / object by index (back-compat)
   if (Array.isArray(src)) return src[i] || '';
-  const byIndex = src[i] || src[String(i)];
-  if (byIndex) return byIndex;
-
-  // 3) optional token/main keys as last resort
+  const byIndex = src[i] || src[String(i)]; if (byIndex) return byIndex;
   const tok = step.main + (step.sub||'') + (step.hours||'') + (step.unit||'');
   return src[tok] || src[step.main] || '';
 }
