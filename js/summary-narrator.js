@@ -28,6 +28,7 @@ const WORDS = {
   day:        'day',
   days:       'days',
   with:       'with',
+  and:       'and',
   using:      'using',
   contactTxt: 'in contact with other products'
 };
@@ -264,7 +265,7 @@ const TPL = {
     const vess = fmt.vessel(step.extras); if (vess) chunks.push(vess);
     const temp = fmt.temperature(step.extras); if (temp) chunks.push(temp);
     const add = fmt.addition(step.extras); if (add) chunks.push(add);
-    if (step.extras.Th === 'yes') chunks.push(`${WORDS.with} a thermal shock`);
+    if (step.extras.Th === 'yes') chunks.push(`${WORDS.and} a final thermal shock`);
 
     const reason = fmt.reason(ctx.reasonText); if (reason) chunks.push(reason);
 
