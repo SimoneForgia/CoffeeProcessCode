@@ -556,7 +556,8 @@ input.is-missing{
 body {
     /* background-image: linear-gradient(to bottom right, #ea3434, #e63e62); */
     /* background-image: linear-gradient(to bottom right, #cf6533, #8f0040); */
-    background: #e63e62;
+    /* background: #e63e62; */
+    background: white;
 }
 .title {
     background: #ffffff;
