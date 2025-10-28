@@ -588,5 +588,76 @@ h2 {
 .sum-row {
     border-top: 1px dashed #ffffff;
 }
-
+h1 {
+    font-size: 20px;
+    margin: 0;
+    font-size: 1.8em;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(to bottom right, #ff7f42, #d70060);
+    text-align: center;
+}
+.step {
+    border: 2px solid #ffffff;
+    border-radius: 38px;
+    /* background: #e63e62; */
+    background: #e63e6200;
+}
+.step.fixed {
+    /* background: #e63e62; */
+    background: #e63e6200;
+}
+label {
+    margin: 10px 10px 0px 10px;
+}
+select, input, button {
+    border-radius: 38px;
+    border: 1px solid #ffffff;
+}
+.ios-switch {
+    border-radius: 38px;
+}
+.ios-switch .thumb {
+    border-radius: 38px;
+}
+.icon-btn {
+    /* background: #6c1631; */
+    background: #6c1631;
+}
+button.ghost {
+    /* background: #e63e62; */
+    background: #6c1631;
+    border: 1px solid var(--line);
+    border: 2px solid white;
+}
+button {
+    border: 2px solid white;
+    background-image: linear-gradient(to bottom right, #ac004d, #df3636);
+}
+.tiny {
+    margin: 8px 20px;
+    color: #e63e62;
+}
+.split-2 {
+    margin-top: 12px;
+}
+#cpc {
+    border: 2px solid var(--line);
+    border-radius: 38px;
+}
+b {
+    margin: 0px 10px 0px 10px;
+}
+#copyIcon svg {
+    position: fixed;
+}
+.split-2 .btn {
+    border-radius: 38px;
+    /* background: #e63e63; */
+    border: 2px solid white;
+    background: #6c1631;
+}
+.split-2 .menu .menu-trigger {
+    border-radius: 38px;
+}
 /* FINE RESTYLE CON SFUMATURE */
