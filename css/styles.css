@@ -558,7 +558,7 @@ body {
     /* background-image: linear-gradient(to bottom right, #cf6533, #8f0040); */
     background: #e63e62;
 }
-title {
+.title {
     background: #ffffff;
     border: 1px solid #ffffff;
     border-radius: 38px;
