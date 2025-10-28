@@ -573,5 +573,7 @@ h2 {
     background-size: cover;
     background-attachment: scroll;
 }
+html, card { height: 100%; }
+card { min-height: 100vh; margin: 0; }
 
 /* FINE RESTYLE CON SFUMATURE */
