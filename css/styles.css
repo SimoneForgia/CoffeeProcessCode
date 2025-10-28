@@ -569,6 +569,9 @@ h2 {
     border: 0px solid var(--line);
     /* background-image: linear-gradient(to bottom right, #8f0040, #cf6533); */
     background-image: linear-gradient(to bottom right, #ac004d, #df3636);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: scroll;
 }
 
 /* FINE RESTYLE CON SFUMATURE */
