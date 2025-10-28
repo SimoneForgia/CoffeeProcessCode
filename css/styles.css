@@ -27,7 +27,7 @@ select{ line-height:1.3; }              /* piccola correzione per l’altezza in
 
 
 h1{font-size:20px;margin:6px 0 6px}
-p.lead{margin:0;color:var(--fg);opacity:.9;font-size:14px}
+p.lead{margin:15px 0;color:var(--fg);opacity:.9;font-size:14px}
 
 button,select,input,a.btn{
   padding:12px;border-radius:12px;border:1px solid var(--line);
@@ -59,7 +59,7 @@ canvas#beanCanvas{width:min(64vw,260px);height:auto;background:#FFFFFF;border-ra
 
 /* Summary page: vertical list */
 #summary{list-style:none;margin:0;padding:0}
-.sum-row{display:grid;grid-template-columns:40px 1fr;align-items:start;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.sum-row{display:grid;grid-template-columns:40px 1fr;align-items:start;gap:10px;padding:6px 0;border-top:1px dashed var(--line)}
 .sum-code{font-weight:700;letter-spacing:.5px}
 .sum-title{display:flex;align-items:center;gap:8px;cursor:pointer}
 .caret-small{width:8px;height:8px;border:solid var(--fg);border-width:0 2px 2px 0;display:inline-block;transform:rotate(-45deg);transition:.15s transform}
@@ -556,7 +556,16 @@ input.is-missing{
 body {
     /* background-image: linear-gradient(to bottom right, #ea3434, #e63e62); */
     /* background-image: linear-gradient(to bottom right, #cf6533, #8f0040); */
+    background: #e63e62;
+}
+title {
     background: #ffffff;
+    border: 1px solid #ffffff;
+    border-radius: 38px;
+    padding: 20px;
+    margin: 12px 0;
+    height: 56px;
+    padding-top: 5px;
 }
 h2 {
     font-size: 1.8em;
@@ -564,11 +573,18 @@ h2 {
     -webkit-text-fill-color: transparent;
     /* background-image: linear-gradient(to right, #ffffff, #fff1f4); */
     background-image: linear-gradient(to bottom right, #ff7f42, #d70060);
+    margin: 0px;
 }
 .card {
-    border: 0px solid var(--line);
+    border: 2px solid #ffffff;
     /* background-image: linear-gradient(to bottom right, #8f0040, #cf6533); */
+    /* background-image: linear-gradient(to bottom right, #ac004d, #df3636); */
     background-image: linear-gradient(to bottom right, #ac004d, #df3636);
+    border-radius: 38px;
+    padding: 20px;
+}
+.sum-row {
+    border-bottom: 1px dashed #ffffff;
 }
 
 /* FINE RESTYLE CON SFUMATURE */
