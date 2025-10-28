@@ -575,6 +575,7 @@ h2 {
     /* background-image: linear-gradient(to right, #ffffff, #fff1f4); */
     background-image: linear-gradient(to bottom right, #ff7f42, #d70060);
     margin: 0px;
+    text-align: center;
 }
 .card {
     border: 2px solid #ffffff;
