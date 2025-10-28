@@ -551,4 +551,24 @@ input.is-missing{
 }
 
 
+/* RESTYLE CON SFUMATURE */
 
+body {
+    /* background-image: linear-gradient(to bottom right, #ea3434, #e63e62); */
+    /* background-image: linear-gradient(to bottom right, #cf6533, #8f0040); */
+    background: #ffffff;
+}
+h2 {
+    font-size: 1.8em;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* background-image: linear-gradient(to right, #ffffff, #fff1f4); */
+    background-image: linear-gradient(to bottom right, #ff7f42, #d70060);
+}
+.card 
+    border: 0px solid var(--line);
+    /* background-image: linear-gradient(to bottom right, #8f0040, #cf6533); */
+    background-image: linear-gradient(to bottom right, #cc005b, #fa3f3f);
+}
+
+/* FINE RESTYLE CON SFUMATURE */
