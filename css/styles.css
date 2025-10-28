@@ -565,15 +565,10 @@ h2 {
     /* background-image: linear-gradient(to right, #ffffff, #fff1f4); */
     background-image: linear-gradient(to bottom right, #ff7f42, #d70060);
 }
-.card 
+.card {
     border: 0px solid var(--line);
     /* background-image: linear-gradient(to bottom right, #8f0040, #cf6533); */
     background-image: linear-gradient(to bottom right, #ac004d, #df3636);
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-attachment: scroll;
 }
-html, card { height: 100%; }
-card { min-height: 100vh; margin: 0; }
 
 /* FINE RESTYLE CON SFUMATURE */
