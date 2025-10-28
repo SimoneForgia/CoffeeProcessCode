@@ -402,34 +402,51 @@ function compose(steps, { useLastly, reasons }) {
     };
   });
 
-  // merge with "and" when eligible, replacing repeated subject with pronoun
+    // merge with "and" when eligible, replacing repeated subject with pronoun
   const out = [];
+  const total = raw.length; // serve per bloccare il merge quando ci sono solo 2 step
   let usedAndLast = false;
+
   for (let i = 0; i < raw.length; i++) {
     const cur = raw[i];
-    if (
+
+    // condizioni base per il merge con "and"
+    const canBaseMerge =
       cur.andCandidate &&
       !usedAndLast &&
       out.length > 0 &&
-      !/\sand\s[^.]*\.$/i.test(out[out.length - 1])
-    ) {
+      total > 2 && // ⬅️ nuovo: non unire se ci sono solo 2 step
+      !/\sand\s[^.]*\.$/i.test(out[out.length - 1]);
+
+    if (canBaseMerge) {
+      // Conta parole: se una delle due frasi supera 12 parole, non unire
+      const prevSentence = out[out.length - 1];
+      const prevWords = prevSentence.replace(/\.\s*$/, '').trim().split(/\s+/).filter(Boolean).length;
+      const curWordsInitial = cur.text.replace(/\.\s*$/, '').trim().split(/\s+/).filter(Boolean).length;
+
+      if (prevWords > 12 || curWordsInitial > 12) {
+        out.push(cur.text);
+        usedAndLast = false;
+        continue;
+      }
+
+      // Procedi con l'unione
       const prev = out.pop().replace(/\.\s*$/, '');
-let curClause = cur.text.trim().replace(/\.$/, '');
+      let curClause = cur.text.trim().replace(/\.$/, '');
 
-// Se il soggetto della seconda frase è identico alla prima, sostituisci con pronome
-const prevMeta = raw[i - 1];
-if (prevMeta && prevMeta.subjKey === cur.subjKey) {
-  curClause = curClause.replace(
-    /^(?:After that,\s+|Next,\s+|Lastly,\s+)?(?:(?:this|the)\s+)?(coffee beans|beans|coffee cherries|cherries|coffee)\s+(was|were)\s+/i,
-    (_, noun) => (/(beans|cherries)/i.test(noun) ? 'they were ' : 'it was ')
-  );
-}
+      // Se il soggetto della seconda frase è identico alla prima, sostituisci con pronome
+      const prevMeta = raw[i - 1];
+      if (prevMeta && prevMeta.subjKey === cur.subjKey) {
+        curClause = curClause.replace(
+          /^(?:After that,\s+|Next,\s+|Lastly,\s+)?(?:(?:this|the)\s+)?(coffee beans|beans|coffee cherries|cherries|coffee)\s+(was|were)\s+/i,
+          (_, noun) => (/(beans|cherries)/i.test(noun) ? 'they were ' : 'it was ')
+        );
+      }
 
-// **Nuovo**: dopo l’unione con "and", forza sempre la minuscola iniziale
-curClause = curClause.replace(/^\s*([A-Z])/, (_, c) => c.toLowerCase());
+      // Dopo l’unione con "and", forza sempre la minuscola iniziale
+      curClause = curClause.replace(/^\s*([A-Z])/, (_, c) => c.toLowerCase());
 
-out.push(prev + ' and ' + curClause + '.');
-
+      out.push(prev + ' and ' + curClause + '.');
       usedAndLast = true;
     } else {
       out.push(cur.text);
