@@ -584,6 +584,9 @@ h2 {
     text-align: center;
     margin-top: -8px;
 }
+h1.card-title {
+    margin: 6px 0 18px;
+}
 p.lead {
     margin: 15px 20px;
     color: #e63e62;
