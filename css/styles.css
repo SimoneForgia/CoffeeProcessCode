@@ -637,7 +637,7 @@ select, input, button {
 input::placeholder,
 select::placeholder,
 textarea::placeholder {
-  color: #bbbbbb; /* ← qui metti il colore che vuoi */
+  color: #cccccc; /* ← qui metti il colore che vuoi */
   opacity: 1;     /* serve per Safari, altrimenti è troppo chiaro */
 }
 .icon-btn {
