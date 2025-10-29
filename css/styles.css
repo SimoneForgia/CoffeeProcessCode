@@ -632,6 +632,13 @@ select, input, button {
 }
 .ios-switch .thumb {
     border-radius: 38px;
+    background-image: linear-gradient(to bottom right, #ac004d, #df3636);
+}
+input::placeholder,
+select::placeholder,
+textarea::placeholder {
+  color: #bbbbbb; /* ← qui metti il colore che vuoi */
+  opacity: 1;     /* serve per Safari, altrimenti è troppo chiaro */
 }
 .icon-btn {
     /* background: #6c1631; */
