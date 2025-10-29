@@ -679,6 +679,18 @@ b {
 .split-2 .menu .menu-trigger {
     border-radius: 38px;
 }
+.menu-list {
+    background: #6c1632;
+    border: 2px solid #ffffff;
+    border-radius: 38px;
+    text-align: center;
+    width: inherit;
+}
+.menu-list a {
+    padding: 10px 14px;
+    color: var(--fg);
+    border-bottom: 1px solid #ffffff;
+}
 .time-field.is-missing, select.is-missing, input.is-missing {
     border-radius: 38px;
 }
