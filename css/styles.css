@@ -647,6 +647,9 @@ button {
     border: 2px solid white;
     background-image: linear-gradient(to bottom right, #ac004d, #df3636);
 }
+button#gen {
+    height: 56px;
+}
 .tiny {
     margin: 8px 20px;
     color: #e63e62;
