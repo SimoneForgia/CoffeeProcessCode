@@ -577,6 +577,13 @@ h2 {
     margin: 0px;
     text-align: center;
 }
+.h1-small {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(to bottom right, #ff7f42, #d70060);
+    text-align: center;
+    margin-top: -8px;
+}
 p.lead {
     margin: 15px 20px;
     color: #e63e62;
@@ -610,6 +617,11 @@ p.lead {
 }
 label {
     margin: 10px 10px 0px 10px;
+}
+.xbtn {
+    right: -17px;
+    top: -17px;
+    border: 0px solid #ffffff;
 }
 select, input, button {
     border-radius: 38px;
