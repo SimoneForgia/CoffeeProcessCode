@@ -588,15 +588,6 @@ h2 {
 .sum-row {
     border-top: 1px dashed #ffffff;
 }
-h1 {
-    font-size: 20px;
-    margin: 0;
-    font-size: 1.8em;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-image: linear-gradient(to bottom right, #ff7f42, #d70060);
-    text-align: center;
-}
 .step {
     border: 2px solid #ffffff;
     border-radius: 38px;
