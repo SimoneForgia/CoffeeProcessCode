@@ -577,6 +577,11 @@ h2 {
     margin: 0px;
     text-align: center;
 }
+p.lead {
+    margin: 15px 20px;
+    color: #e63e62;
+    display: none;
+}
 .card {
     border: 2px solid #ffffff;
     /* background-image: linear-gradient(to bottom right, #8f0040, #cf6533); */
@@ -592,11 +597,16 @@ h2 {
     border: 2px solid #ffffff;
     border-radius: 38px;
     /* background: #e63e62; */
-    background: #e63e6200;
+    /* background: #e63e6200; */
+    background-image: linear-gradient(to bottom right, #ac004d, #df3636);
+    background-clip: padding-box;
 }
 .step.fixed {
+    margin-top: 0px;
     /* background: #e63e62; */
-    background: #e63e6200;
+    /* background: #e63e6200; */
+    background-image: linear-gradient(to bottom right, #ac004d, #df3636);
+    background-clip: padding-box;
 }
 label {
     margin: 10px 10px 0px 10px;
@@ -633,11 +643,14 @@ button {
     margin-top: 12px;
 }
 #cpc {
-    border: 2px solid var(--line);
+    border: 2px solid #ffffff;
     border-radius: 38px;
 }
 b {
     margin: 0px 10px 0px 10px;
+}
+#copyIcon {
+    border: none;
 }
 #copyIcon svg {
     position: fixed;
@@ -649,6 +662,9 @@ b {
     background: #6c1631;
 }
 .split-2 .menu .menu-trigger {
+    border-radius: 38px;
+}
+.time-field.is-missing, select.is-missing, input.is-missing {
     border-radius: 38px;
 }
 /* FINE RESTYLE CON SFUMATURE */
