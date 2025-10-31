@@ -717,61 +717,44 @@ b {
 
 
 /* ANIMAZIONE LIGHT SWEEP */
-/* === Light Sweep Reveal — band morbida + avvio lento === */
+/* === Light Sweep Reveal — overlay pieno + alone morbido visibile === */
 #revealOverlay{
   position: fixed;
   inset: 0;
-  background: #ffffff;    /* pagina tutta bianca all'inizio */
+  background: #ffffff;          /* tutto bianco all'inizio */
   z-index: 9999;
   pointer-events: none;
-  will-change: transform, opacity;
-  /* 5s e curva con avvio lento (ease-in-ish), poi accelera e ammorbidisce sul finale */
-  animation: reveal-down 5s cubic-bezier(.22,.0,.15,1) forwards;
+  overflow: visible;            /* serve per mostrare l'alone che esce dal bordo */
+  will-change: transform, filter;
+  /* 4.8s, avvio molto lento, poi accelera, poi ammorbidisce il finale */
+  animation: reveal-down 4.8s cubic-bezier(.45, 0, .2, 1) forwards;
+  /* glow sotto il bordo: drop-shadow si vede SOTTO l'overlay sul contenuto */
+  filter: drop-shadow(0 24px 48px rgba(255,255,255,.45))
+          drop-shadow(0 8px 20px rgba(255,255,255,.55));
 }
 
-/* Banda luminosa con alone morbido */
-#revealOverlay .light{
-  position: absolute;
-  left: 0;
-  bottom: 0;             /* la banda sta sul bordo inferiore dell'overlay che scende */
-  width: 100%;
-  height: 120px;         /* spessore banda (era 2–3px, ora “soft beam”) */
-  /* gradiente verticale: trasparente → bianco → trasparente */
-  background: linear-gradient(
-    to bottom,
-    rgba(255,255,255,0) 0%,
-    rgba(255,255,255,0.85) 40%,
-    rgba(255,255,255,1) 50%,
-    rgba(255,255,255,0.85) 60%,
-    rgba(255,255,255,0) 100%
-  );
-  /* alone morbido attorno alla banda (solo ombre, niente blur filter costoso) */
-  box-shadow:
-    0 0 40px 12px rgba(255,255,255,.55),
-    0 0 120px 36px rgba(255,255,255,.35),
-    0 0 240px 70px rgba(255,255,255,.2);
-  will-change: transform, opacity;
-}
-
-/* alone extra molto ampio (anello esterno) */
-#revealOverlay .light::after{
+/* Banda morbida che “esce” sotto l’overlay (così non è bianco su bianco) */
+#revealOverlay::after{
   content:"";
   position:absolute;
-  left:0; right:0; bottom:-80px;
-  height: 220px; /* alone largo e soffice */
-  background: radial-gradient(
-    120% 80% at 50% 0%,
-    rgba(255,255,255,.25) 0%,
-    rgba(255,255,255,.10) 40%,
-    rgba(255,255,255,0) 80%
-  );
+  left:0; right:0;
+  bottom:-90px;                /* sporge sotto l’overlay */
+  height:220px;                /* spessore dell’alone */
   pointer-events:none;
+  /* gradiente morbido che sfuma nel contenuto */
+  background: radial-gradient(
+    120% 100% at 50% 0%,
+    rgba(255,255,255,.75) 0%,
+    rgba(255,255,255,.35) 40%,
+    rgba(255,255,255,.12) 70%,
+    rgba(255,255,255,0) 100%
+  );
 }
 
-/* L’overlay scende e libera la pagina dall’alto verso il basso */
+/* movimento dall’alto verso il basso */
 @keyframes reveal-down{
-  from { transform: translateY(0); }
-  to   { transform: translateY(100%); }
+  from { transform: translateY(0); }          /* tutto coperto (bianco) */
+  to   { transform: translateY(100%); }       /* overlay fuori schermo, contenuto visibile */
 }
 
 /* Accessibilità */
