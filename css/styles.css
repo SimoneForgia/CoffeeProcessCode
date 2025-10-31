@@ -717,48 +717,85 @@ b {
 
 
 /* ANIMAZIONE LIGHT SWEEP */
-/* === Light Sweep Reveal — overlay pieno + alone morbido visibile === */
+/* === Light Sweep Reveal — avvio molto lento + luce abbagliante senza bordo netto === */
 #revealOverlay{
   position: fixed;
   inset: 0;
-  background: #ffffff;          /* tutto bianco all'inizio */
+  background: #fff;                  /* tutto bianco all’avvio */
   z-index: 9999;
   pointer-events: none;
-  overflow: visible;            /* serve per mostrare l'alone che esce dal bordo */
-  will-change: transform, filter;
-  /* 4.8s, avvio molto lento, poi accelera, poi ammorbidisce il finale */
-  animation: reveal-down 4.8s cubic-bezier(.45, 0, .2, 1) forwards;
-  /* glow sotto il bordo: drop-shadow si vede SOTTO l'overlay sul contenuto */
-  filter: drop-shadow(0 24px 48px rgba(255,255,255,.45))
-          drop-shadow(0 8px 20px rgba(255,255,255,.55));
+  overflow: visible;
+  will-change: transform, filter, -webkit-mask-position, mask-position;
+
+  /* Avvio LENTISSIMO → accelera → chiusura morbida (6s) */
+  animation: reveal-down 6s cubic-bezier(.72,0,.22,1) forwards;
+
+  /* Bordo inferiore “sfumato” (evita la riga netta) */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 86%, rgba(0,0,0,0) 100%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 86%, rgba(0,0,0,0) 100%);
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+
+  /* Glow che si proietta SOTTO l’overlay sul contenuto rivelato */
+  filter:
+    drop-shadow(0 28px 56px rgba(255,255,255,.55))
+    drop-shadow(0 12px 28px rgba(255,255,255,.65));
 }
 
-/* Banda morbida che “esce” sotto l’overlay (così non è bianco su bianco) */
+/* Core beam + profilo più alto al centro (due gradient radiali sovrapposti) */
+#revealOverlay::before{
+  content:"";
+  position:absolute;
+  left:-8%; right:-8%;
+  bottom:-130px;                 /* sporge sotto l’overlay */
+  height: 340px;                 /* spessore della fascia di luce */
+  pointer-events:none;
+
+  /* 1) Radiale largo (alone) + 2) Radiale stretto (core abbagliante al centro) */
+  background:
+    radial-gradient(85% 170% at 50% 0%,
+      rgba(255,255,255,0.70) 0%,
+      rgba(255,255,255,0.40) 40%,
+      rgba(255,255,255,0.16) 70%,
+      rgba(255,255,255,0.00) 100%),
+    radial-gradient(32% 130% at 50% 0%,
+      rgba(255,255,255,1.00) 0%,
+      rgba(255,255,255,0.92) 35%,
+      rgba(255,255,255,0.00) 75%);
+
+  /* Maschera orizzontale che assottiglia i bordi → centro più alto */
+  -webkit-mask-image: radial-gradient(70% 120% at 50% 0%, #000 60%, rgba(0,0,0,0) 100%);
+          mask-image: radial-gradient(70% 120% at 50% 0%, #000 60%, rgba(0,0,0,0) 100%);
+
+  /* alone extra amplissimo */
+  box-shadow:
+    0 0 64px 18px rgba(255,255,255,.50),
+    0 0 180px 42px rgba(255,255,255,.35),
+    0 0 360px 84px rgba(255,255,255,.22);
+}
+
+/* alone diffuso più basso e larghissimo (nessun bordo visibile) */
 #revealOverlay::after{
   content:"";
   position:absolute;
-  left:0; right:0;
-  bottom:-90px;                /* sporge sotto l’overlay */
-  height:220px;                /* spessore dell’alone */
+  left:-12%; right:-12%;
+  bottom:-220px;
+  height: 520px;
   pointer-events:none;
-  /* gradiente morbido che sfuma nel contenuto */
-  background: radial-gradient(
-    120% 100% at 50% 0%,
-    rgba(255,255,255,.75) 0%,
-    rgba(255,255,255,.35) 40%,
-    rgba(255,255,255,.12) 70%,
-    rgba(255,255,255,0) 100%
-  );
+  background: radial-gradient(140% 180% at 50% 0%,
+    rgba(255,255,255,.38) 0%,
+    rgba(255,255,255,.22) 40%,
+    rgba(255,255,255,.10) 70%,
+    rgba(255,255,255,0) 100%);
 }
 
-/* movimento dall’alto verso il basso */
+/* Movimento dall’alto verso il basso: overlay scende e libera la pagina */
 @keyframes reveal-down{
   from { transform: translateY(0); }          /* tutto coperto (bianco) */
-  to   { transform: translateY(100%); }       /* overlay fuori schermo, contenuto visibile */
+  to   { transform: translateY(100%); }       /* fuori schermo → contenuto visibile */
 }
 
 /* Accessibilità */
 @media (prefers-reduced-motion: reduce){
-  #revealOverlay{ animation: none; opacity: 0; }
+  #revealOverlay{ animation:none; opacity:0; }
 }
 /* FINE ANIMAZIONE LIGHT SWEEP */
