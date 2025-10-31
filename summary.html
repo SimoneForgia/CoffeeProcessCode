@@ -3,6 +3,11 @@
 <title>Summary — Coffee Process Code</title>
 <link rel="stylesheet" href="css/styles.css">
 </head><body>
+
+<div id="revealOverlay" aria-hidden="true">
+  <div class="light"></div>
+</div>
+  
 <div class="wrap">
   <div class="title">
   <h1 class="page-title">Coffee Process Code</h1>
@@ -41,4 +46,16 @@
     });
   });
 </script>
+
+<script>
+  // Rimuove l’overlay a fine animazione per zero costi residui
+  (function(){
+    const ov = document.getElementById('revealOverlay');
+    if(!ov) return;
+    ov.addEventListener('animationend', () => {
+      ov.remove();
+    }, { once:true });
+  })();
+</script>
+  
 </body></html>
