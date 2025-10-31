@@ -725,18 +725,36 @@ b {
   z-index: 9999;
   pointer-events: none;
   /* Maschera con “finestra” orizzontale che scorre verso il basso */
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 100%);
-          mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 100%);
-  -webkit-mask-size: 100% 300%;
-          mask-size: 100% 300%;
+   /* Finestra trasparente (12%→24%) in mezzo a zone opache */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 36%,
+    rgba(0,0,0,0) 50%, /* ← finestra */
+    #000 64%,
+    #000 100%
+  );
+          mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 36%,
+    rgba(0,0,0,0) 50%,
+    #000 64%,
+    #000 100%
+  );
+  -webkit-mask-size: 100% 320%;
+          mask-size: 100% 320%;
   -webkit-mask-repeat: no-repeat;
           mask-repeat: no-repeat;
-  -webkit-mask-position: 0 0;
-          mask-position: 0 0;
+  /* Parto con la finestra ben sopra al viewport: tutto bianco all’inizio */
+  -webkit-mask-position: 0 -120%;
+          mask-position: 0 -120%;
+
 
   animation:
     sweep-mask 6.5s linear forwards,
-    fade-out    .6s  ease-out 6.2s forwards; /* svanisce solo a fine sweep */
+    fade-out    .6s  ease-out 6.4s forwards; /* dissolve negli ultimi ~0.6s */
+
 }
 
 /* Barra luminosa centrale (effetto “laser” + alone) */
@@ -751,17 +769,19 @@ b {
     0 0 24px 6px rgba(255,255,255,.65),
     0 0 80px 24px rgba(255,255,255,.35);
   will-change: transform, opacity;
-  animation: sweep-bar 1.2s linear forwards;
+  animation: sweep-bar 6.5s linear forwards;
+
 }
 
 @keyframes sweep-mask{
   to{
-    -webkit-mask-position: 0 100%;
-            mask-position: 0 100%;
+    -webkit-mask-position: 0 140%;
+            mask-position: 0 140%;
   }
 }
 @keyframes sweep-bar{
-  to{ transform: translateY(100vh); } /* scende fino al bordo inferiore del viewport */
+  from{ transform: translateY(-100vh); } /* entra dall’alto (fuori schermo) */
+  to  { transform: translateY(200vh); }  /* esce ben sotto */
 }
 @keyframes fade-out{
   to{ opacity: 0; }
