@@ -717,85 +717,108 @@ b {
 
 
 /* ANIMAZIONE LIGHT SWEEP */
-/* === Light Sweep Reveal — avvio molto lento + luce abbagliante senza bordo netto === */
+/* === Light Sweep (mask + barra con alone), top→bottom, avvio molto lento === */
 #revealOverlay{
   position: fixed;
   inset: 0;
-  background: #fff;                  /* tutto bianco all’avvio */
+  background: #fff;                 /* tutto bianco all’inizio */
   z-index: 9999;
   pointer-events: none;
-  overflow: visible;
-  will-change: transform, filter, -webkit-mask-position, mask-position;
+  overflow: visible;                 /* per mostrare glow che sporge */
+  will-change: -webkit-mask-position, mask-position, filter;
 
-  /* Avvio LENTISSIMO → accelera → chiusura morbida (6s) */
-  animation: reveal-down 6s cubic-bezier(.72,0,.22,1) forwards;
+  /* Finestra di rivelazione: banda trasparente al centro del gradiente che scorre */
+  /* Bianco=opaco (copre), Trasparente=apre (rivela) */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0,0,0,1)   0%,
+    rgba(0,0,0,1)  36%,  /* sopra al “taglio” rimane opaco */
+    rgba(0,0,0,0)  50%,  /* banda centrale trasparente (la finestra di reveal) */
+    rgba(0,0,0,1)  64%,  /* sotto torna opaco */
+    rgba(0,0,0,1) 100%
+  );
+          mask-image: linear-gradient(
+    to bottom,
+    rgba(0,0,0,1)   0%,
+    rgba(0,0,0,1)  36%,
+    rgba(0,0,0,0)  50%,
+    rgba(0,0,0,1)  64%,
+    rgba(0,0,0,1) 100%
+  );
+  /* Facciamo la “pista” più alta del viewport così la banda entra dall’alto ed esce in basso */
+  -webkit-mask-size: 100% 320%;
+          mask-size: 100% 320%;
 
-  /* Bordo inferiore “sfumato” (evita la riga netta) */
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 86%, rgba(0,0,0,0) 100%);
-          mask-image: linear-gradient(to bottom, #000 0%, #000 86%, rgba(0,0,0,0) 100%);
-  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  /* Partenza: banda sopra al viewport → tutto coperto */
+  -webkit-mask-position: 0 -120%;
+          mask-position: 0 -120%;
 
-  /* Glow che si proietta SOTTO l’overlay sul contenuto rivelato */
+  /* Avvio MOLTO lento, poi accelera e chiude morbido (6.2s) */
+  animation:
+    sweepMask 6.2s cubic-bezier(.88,0,.22,1) forwards,
+    fadeOverlay .25s ease-out 6.0s forwards;
+
+  /* Glow proiettato sotto l’overlay (si nota anche su contenuti chiari) */
   filter:
-    drop-shadow(0 28px 56px rgba(255,255,255,.55))
-    drop-shadow(0 12px 28px rgba(255,255,255,.65));
+    drop-shadow(0 28px 60px rgba(255,255,255,.55))
+    drop-shadow(0 10px 28px rgba(255,255,255,.65));
 }
 
-/* Core beam + profilo più alto al centro (due gradient radiali sovrapposti) */
-#revealOverlay::before{
-  content:"";
-  position:absolute;
-  left:-8%; right:-8%;
-  bottom:-130px;                 /* sporge sotto l’overlay */
-  height: 340px;                 /* spessore della fascia di luce */
-  pointer-events:none;
-
-  /* 1) Radiale largo (alone) + 2) Radiale stretto (core abbagliante al centro) */
-  background:
-    radial-gradient(85% 170% at 50% 0%,
-      rgba(255,255,255,0.70) 0%,
-      rgba(255,255,255,0.40) 40%,
-      rgba(255,255,255,0.16) 70%,
-      rgba(255,255,255,0.00) 100%),
-    radial-gradient(32% 130% at 50% 0%,
-      rgba(255,255,255,1.00) 0%,
-      rgba(255,255,255,0.92) 35%,
-      rgba(255,255,255,0.00) 75%);
-
-  /* Maschera orizzontale che assottiglia i bordi → centro più alto */
-  -webkit-mask-image: radial-gradient(70% 120% at 50% 0%, #000 60%, rgba(0,0,0,0) 100%);
-          mask-image: radial-gradient(70% 120% at 50% 0%, #000 60%, rgba(0,0,0,0) 100%);
-
-  /* alone extra amplissimo */
-  box-shadow:
-    0 0 64px 18px rgba(255,255,255,.50),
-    0 0 180px 42px rgba(255,255,255,.35),
-    0 0 360px 84px rgba(255,255,255,.22);
-}
-
-/* alone diffuso più basso e larghissimo (nessun bordo visibile) */
+/* Barra di luce con alone morbido (nessun bordo netto), più “alta” al centro */
 #revealOverlay::after{
   content:"";
   position:absolute;
-  left:-12%; right:-12%;
-  bottom:-220px;
-  height: 520px;
+  left:-10%;
+  right:-10%;
+  /* la posizioniamo in corrispondenza della banda trasparente del mask */
+  top: -120vh;                        /* allineata alla partenza del mask */
+  height: 34vh;                       /* spessore della fascia luminosa */
   pointer-events:none;
-  background: radial-gradient(140% 180% at 50% 0%,
-    rgba(255,255,255,.38) 0%,
-    rgba(255,255,255,.22) 40%,
-    rgba(255,255,255,.10) 70%,
-    rgba(255,255,255,0) 100%);
+
+  /* due radiali sovrapposti: core abbagliante + alone morbidissimo */
+  background:
+    radial-gradient(30% 140% at 50% 50%,
+      rgba(255,255,255,1) 0%,
+      rgba(255,255,255,.95) 35%,
+      rgba(255,255,255,0) 75%)
+    ,
+    radial-gradient(85% 180% at 50% 50%,
+      rgba(255,255,255,.55) 0%,
+      rgba(255,255,255,.25) 45%,
+      rgba(255,255,255,0) 100%);
+
+  /* maschera orizzontale: lato più sottile, centro più alto */
+  -webkit-mask-image: radial-gradient(70% 120% at 50% 50%, #000 65%, rgba(0,0,0,0) 100%);
+          mask-image: radial-gradient(70% 120% at 50% 50%, #000 65%, rgba(0,0,0,0) 100%);
+
+  /* Segue lo sweep con la stessa tempistica (traslazione verticale) */
+  will-change: transform;
+  animation: sweepBar 6.2s cubic-bezier(.88,0,.22,1) forwards;
 }
 
-/* Movimento dall’alto verso il basso: overlay scende e libera la pagina */
-@keyframes reveal-down{
-  from { transform: translateY(0); }          /* tutto coperto (bianco) */
-  to   { transform: translateY(100%); }       /* fuori schermo → contenuto visibile */
+/* La banda trasparente (nella mask) scende dall’alto verso il basso */
+@keyframes sweepMask{
+  to{
+    -webkit-mask-position: 0 140%;
+            mask-position: 0 140%;
+  }
+}
+
+/* La barra luminosa scende in sincrono (versione “viewport”) */
+@keyframes sweepBar{
+  to{
+    transform: translateY(240vh);   /* entra dall’alto ed esce ben oltre il fondo */
+  }
+}
+
+/* Dissolvenza finale dell’overlay (leggera) */
+@keyframes fadeOverlay{
+  to{ opacity: 0; }
 }
 
 /* Accessibilità */
 @media (prefers-reduced-motion: reduce){
-  #revealOverlay{ animation:none; opacity:0; }
+  #revealOverlay{ animation: none; opacity: 0; }
+  #revealOverlay::after{ animation: none; }
 }
 /* FINE ANIMAZIONE LIGHT SWEEP */
