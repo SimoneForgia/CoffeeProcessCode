@@ -734,8 +734,8 @@ b {
   -webkit-mask-position: 0 0;
           mask-position: 0 0;
   animation:
-    sweep-mask 1.2s cubic-bezier(.2,.6,.15,1) forwards,
-    fade-out   .25s ease-out 1.05s forwards; /* svanisce verso la fine */
+    sweep-mask 3s cubic-bezier(.2,.6,.15,1) forwards,
+    fade-out   .6s ease-out 2.7s forwards; /* svanisce verso la fine */
 }
 
 /* Barra luminosa centrale (effetto “laser” + alone) */
@@ -750,7 +750,7 @@ b {
     0 0 24px 6px rgba(255,255,255,.65),
     0 0 80px 24px rgba(255,255,255,.35);
   will-change: transform, opacity;
-  animation: sweep-bar 1.2s cubic-bezier(.2,.6,.15,1) forwards;
+  animation: sweep-bar 3s cubic-bezier(.2,.6,.15,1) forwards;
 }
 
 @keyframes sweep-mask{
