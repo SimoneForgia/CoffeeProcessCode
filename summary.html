@@ -4,51 +4,26 @@
 <link rel="stylesheet" href="css/styles.css">
 </head><body>
 <div class="wrap">
-
-  <!-- TITOLO con parentesi + digitazione -->
   <div class="title">
-    <h1 id="heroTitle" class="hero-title" aria-label="Coffee Process Code">
-      <span class="bracket left" aria-hidden="true">[</span>
-      <span class="type-target" data-text="Coffee Process Code"></span>
-      <span class="bracket right" aria-hidden="true">]</span>
-    </h1>
+  <h2>Coffee Process Code</h2>
   </div>
-
-  <!-- BOX: Summary -->
-  <div class="card type-card" id="card-summary" data-seq="1">
-    <h2 class="card-title">Summary</h2>
-
-    <!-- wrapper per digitazione del testo generato da SummaryNarrator -->
-    <div class="summary-paragraph">
-      <span class="type-wrap">
-        <!-- lo script inserirà qui dentro lo span .type-target con il testo -->
-        <span id="processSummary" class="type-target" data-text=""></span>
-      </span>
-    </div>
-  </div>
-
-  <!-- BOX: Code breakdown (parte SOLO dopo il primo “chunk” del Summary) -->
-  <div class="card type-card is-pending" id="card-breakdown" data-seq="2" hidden>
-    <h2 class="card-title">Code breakdown</h2>
-
-    <!-- lead con digitazione -->
-    <p class="lead">
-      <span class="type-wrap">
-        <span class="type-target" data-text="Expand the titles for explanations about the different steps this coffee went through."></span>
-      </span>
-    </p>
-
-    <!-- la lista viene popolata dal tuo summary.js; la digiteremo elemento per elemento -->
-    <ul id="summary"></ul>
-  </div>
-
+<!-- BOX: Summary -->
+<div class="card">
+  <h1 class="card-title">Summary</h1>
+  <div id="processSummary" class="summary-paragraph"></div>
 </div>
 
-<!-- I TUOI SCRIPT ESISTENTI (non toccare): -->
-<script type="module" src="js/summary.js"></script>
-<script type="module" src="js/summary-narrator.js"></script>
+<!-- BOX: Code breakdown -->
+<div class="card">
+  <h1 class="card-title">Code breakdown</h1>
+  <p class="lead">Expand the titles for explanations about the different steps this coffee went through.</p>
+  <ul id="summary"></ul>
+</div>
 
-<!-- Inizializzazione esistente (non toccare il contenuto): -->
+</div>
+<script type="module" src="js/summary.js"></script>
+
+<script type="module" src="js/summary-narrator.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     SummaryNarrator.init({
@@ -66,8 +41,4 @@
     });
   });
 </script>
-
-<!-- NUOVO: script per animazioni SOLO in questa pagina -->
-<script src="js/typing-anim-summary.js" defer></script>
-
 </body></html>
