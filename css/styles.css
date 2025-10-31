@@ -584,7 +584,7 @@ h2 {
     text-align: center;
     margin-top: -8px;
 }
-h1.card-title {
+.card-title {
     margin: 6px 0 18px;
 }
 p.lead {
@@ -705,3 +705,78 @@ b {
     border-radius: 38px;
 }
 /* FINE RESTYLE CON SFUMATURE */
+
+
+
+
+
+
+
+/* CSS ANIMAZIONE DIGITAZIONE */
+/* === Typing + Brackets (aggiunta per summary.html) === */
+
+/* Titolo con parentesi che “si aprono” dal centro */
+.hero-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: .25ch;
+    font-size: 1.8em;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(to bottom right, #ff7f42, #d70060);
+    margin: 0;
+    text-align: center;
+}
+.hero-title .bracket {
+  display: inline-block;
+  font-weight: 900;
+  transform-origin: center;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.hero-title .bracket.left  { transform-origin: right; }
+.hero-title .bracket.right { transform-origin: left; }
+
+@keyframes bracket-open-left {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+@keyframes bracket-open-right {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+
+/* cursore lampeggiante */
+.type-caret::after {
+  content: "▍";
+  display: inline-block;
+  margin-left: 2px;
+  animation: blink 1s steps(2, start) infinite;
+}
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%,100%{ opacity: 0; }
+}
+
+/* Card che “si allarga” mentre digita */
+.type-card .type-wrap {
+  display: inline-block;          /* permette di “allargarsi” in base al testo */
+  max-width: 100%;
+  overflow: hidden;
+  white-space: normal;
+  will-change: width, contents;
+}
+
+/* Mostra la seconda card quando lo script rimuove lo stato pendente */
+.type-card.is-pending[hidden] { display: none !important; }
+
+/* Performance */
+.type-card { content-visibility: auto; }
+
+/* Accessibilità: se l’utente preferisce meno animazioni, saltiamo tutto */
+@media (prefers-reduced-motion: reduce) {
+  .type-caret::after { content: ""; animation: none; }
+  .hero-title .bracket { opacity: 1; transform: none; }
+}
+/* FINE CSS ANIMAZIONE DIGITAZIONE */
