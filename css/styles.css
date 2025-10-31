@@ -714,3 +714,61 @@ b {
     border-radius: 38px;
 }
 /* FINE RESTYLE CON SFUMATURE */
+
+
+/* ANIMAZIONE LIGHT SWEEP */
+/* === Light Sweep Reveal (solo summary.html) === */
+#revealOverlay{
+  position: fixed;
+  inset: 0;
+  background: #ffffff;              /* colore “tendina” che copre la pagina */
+  z-index: 9999;
+  pointer-events: none;
+  /* Maschera con “finestra” orizzontale che scorre verso il basso */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 12%, #000 24%);
+          mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 12%, #000 24%);
+  -webkit-mask-size: 100% 300%;
+          mask-size: 100% 300%;
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: 0 0;
+          mask-position: 0 0;
+  animation:
+    sweep-mask 1.2s cubic-bezier(.2,.6,.15,1) forwards,
+    fade-out   .25s ease-out 1.05s forwards; /* svanisce verso la fine */
+}
+
+/* Barra luminosa centrale (effetto “laser” + alone) */
+#revealOverlay .light{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 2px; /* spessore linea */
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+  box-shadow:
+    0 0 24px 6px rgba(255,255,255,.65),
+    0 0 80px 24px rgba(255,255,255,.35);
+  will-change: transform, opacity;
+  animation: sweep-bar 1.2s cubic-bezier(.2,.6,.15,1) forwards;
+}
+
+@keyframes sweep-mask{
+  to{
+    -webkit-mask-position: 0 100%;
+            mask-position: 0 100%;
+  }
+}
+@keyframes sweep-bar{
+  to{ transform: translateY(100vh); } /* scende fino al bordo inferiore del viewport */
+}
+@keyframes fade-out{
+  to{ opacity: 0; }
+}
+
+/* Accessibilità: niente animazione se l’utente la riduce */
+@media (prefers-reduced-motion: reduce){
+  #revealOverlay{ animation: none; opacity: 0; }
+  #revealOverlay .light{ animation: none; }
+}
+/* FINE ANIMAZIONE LIGHT SWEEP */
