@@ -748,8 +748,8 @@ b {
 
 
   animation:
-    sweep-mask 6.5s linear forwards,
-    fade-out    .6s  ease-out 6.4s forwards; /* dissolve negli ultimi ~0.6s */
+    sweep-mask 3.5s linear forwards,
+    fade-out    3s  ease-out 3.4s forwards; /* dissolve negli ultimi ~0.6s */
 
 }
 
@@ -765,7 +765,7 @@ b {
     0 0 24px 6px rgba(255,255,255,.65),
     0 0 80px 24px rgba(255,255,255,.35);
   will-change: transform, opacity;
-  animation: sweep-bar 6.5s linear forwards;
+  animation: sweep-bar 3.5s linear forwards;
 
 }
 
