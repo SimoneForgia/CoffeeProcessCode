@@ -577,6 +577,14 @@ h2 {
     margin: 0px;
     text-align: center;
 }
+.page-title {
+  font-size: 1.8em;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(to bottom right, #ff7f42, #d70060);
+  margin: 0;
+  text-align: center;
+}
 .h1-small {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -584,7 +592,7 @@ h2 {
     text-align: center;
     margin-top: -8px;
 }
-h1.card-title {
+.card-title {
     margin: 6px 0 18px;
 }
 p.lead {
