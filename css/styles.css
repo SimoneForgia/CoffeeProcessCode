@@ -717,40 +717,49 @@ b {
 
 
 /* ANIMAZIONE LIGHT SWEEP */
-/* === Light Sweep Reveal (solo summary.html) === */
+/* === Light Sweep Reveal (summary.html) — finestra singola, start bianco, sweep lento === */
 #revealOverlay{
   position: fixed;
   inset: 0;
-  background: #ffffff;              /* colore “tendina” che copre la pagina */
+  background: #ffffff;                 /* pagina tutta bianca all’avvio */
   z-index: 9999;
   pointer-events: none;
-  /* Maschera con “finestra” orizzontale che scorre verso il basso */
-   /* Finestra trasparente (12%→24%) in mezzo a zone opache */
+  overflow: visible;
+
+  /* MASK: due zone opache (#000) + “finestra” trasparente stretta al centro
+     (46%/50%/54% → finestra più stretta = zero “effetto galleria”) */
   -webkit-mask-image: linear-gradient(
     to bottom,
     #000 0%,
-    #000 10%,
-    rgba(0,0,0,0) 100%, /* ← finestra */
+    #000 46%,
+    rgba(0,0,0,0) 50%,   /* ← la finestra che rivela */
+    #000 54%,
+    #000 100%
   );
- mask-image: linear-gradient(
+          mask-image: linear-gradient(
     to bottom,
     #000 0%,
-    #000 10%,
-    rgba(0,0,0,0) 100%,
+    #000 46%,
+    rgba(0,0,0,0) 50%,
+    #000 54%,
+    #000 100%
   );
+
+  /* Mask molto più alta del viewport per far partire e finire fuori schermo */
   -webkit-mask-size: 100% 320%;
           mask-size: 100% 320%;
   -webkit-mask-repeat: no-repeat;
           mask-repeat: no-repeat;
-  /* Parto con la finestra ben sopra al viewport: tutto bianco all’inizio */
-  -webkit-mask-position: 0 0;
-          mask-position: 0 0;
 
+  /* PARTENZA: finestra ben sopra al viewport → tutto bianco, nessun flicker
+     (320% di altezza → centro finestra a 160%; -182% + 160% = -22% = sopra) */
+  -webkit-mask-position: 0 -182%;
+          mask-position: 0 -182%;
 
+  /* Sweep lento e lineare; dissolve solo al termine */
   animation:
-    sweep-mask 3.5s linear forwards,
-    fade-out    3s  ease-out 3.4s forwards; /* dissolve negli ultimi ~0.6s */
-
+    sweep-mask 6.5s linear forwards,
+    fade-out    .6s  ease-out 6.4s forwards;
 }
 
 /* Barra luminosa centrale (effetto “laser” + alone) */
@@ -759,31 +768,38 @@ b {
   left: 0;
   top: 0;
   width: 100%;
-  height: 2px; /* spessore linea */
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+  height: 3px;  /* spessore linea (più visibile) */
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,1), transparent);
   box-shadow:
-    0 0 24px 6px rgba(255,255,255,.65),
-    0 0 80px 24px rgba(255,255,255,.35);
+    0 0 30px 8px rgba(255,255,255,.75),
+    0 0 100px 30px rgba(255,255,255,.45);
   will-change: transform, opacity;
-  animation: sweep-bar 3.5s linear forwards;
 
+  /* Sincronizzata con la mask: entra da sopra, esce ben sotto */
+  animation: sweep-bar 6.5s linear forwards;
 }
 
+/* La finestra trasparente della mask scende dall’alto verso il basso
+   (partenza -182% → arrivo 140% = attraversa e sparisce oltre il fondo) */
 @keyframes sweep-mask{
   to{
     -webkit-mask-position: 0 140%;
             mask-position: 0 140%;
   }
 }
+
+/* La barra luminosa segue lo stesso percorso (in termini di viewport) */
 @keyframes sweep-bar{
-  from{ transform: translateY(-100vh); } /* entra dall’alto (fuori schermo) */
-  to  { transform: translateY(200vh); }  /* esce ben sotto */
+  from{ transform: translateY(-100vh); }  /* inizia sopra lo schermo */
+  to  { transform: translateY(200vh); }   /* termina ben sotto lo schermo */
 }
+
+/* Dissolvenza finale dell’overlay */
 @keyframes fade-out{
   to{ opacity: 0; }
 }
 
-/* Accessibilità: niente animazione se l’utente la riduce */
+/* Accessibilità: niente animazioni per chi le riduce */
 @media (prefers-reduced-motion: reduce){
   #revealOverlay{ animation: none; opacity: 0; }
   #revealOverlay .light{ animation: none; }
