@@ -725,8 +725,8 @@ b {
   z-index: 9999;
   pointer-events: none;
   /* Maschera con “finestra” orizzontale che scorre verso il basso */
-  -webkit-mask-image: linear-gradient(to bottom, #000 100%, rgba(0,0,0,0) 0);
-          mask-image: linear-gradient(to bottom, #000 100%, rgba(0,0,0,0) 0);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 100%);
+          mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 100%);
   -webkit-mask-size: 100% 300%;
           mask-size: 100% 300%;
   -webkit-mask-repeat: no-repeat;
