@@ -734,13 +734,11 @@ b {
     #000 64%,
     #000 100%
   );
-          mask-image: linear-gradient(
+ mask-image: linear-gradient(
     to bottom,
     #000 0%,
-    #000 36%,
-    rgba(0,0,0,0) 50%,
-    #000 64%,
-    #000 100%
+    #000 10%,
+    rgba(0,0,0,0) 100%,
   );
   -webkit-mask-size: 100% 320%;
           mask-size: 100% 320%;
