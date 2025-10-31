@@ -735,7 +735,7 @@ b {
           mask-position: 0 0;
 
   animation:
-    sweep-mask 6.5s cubic-bezier(.9,0,.22,1) forwards,
+    sweep-mask 6.5s linear forwards,
     fade-out    .6s  ease-out 6.2s forwards; /* svanisce solo a fine sweep */
 }
 
@@ -751,7 +751,7 @@ b {
     0 0 24px 6px rgba(255,255,255,.65),
     0 0 80px 24px rgba(255,255,255,.35);
   will-change: transform, opacity;
-  animation: sweep-bar 1.2s cubic-bezier(.2,.6,.15,1) forwards;
+  animation: sweep-bar 1.2s linear forwards;
 }
 
 @keyframes sweep-mask{
