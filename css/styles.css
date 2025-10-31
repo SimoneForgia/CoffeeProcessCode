@@ -755,8 +755,8 @@ b {
 
 @keyframes sweep-mask{
   to{
-    -webkit-mask-position: 0 -100%;
-            mask-position: 0 -100%;
+    -webkit-mask-position: 0 100%;
+            mask-position: 0 100%;
   }
 }
 @keyframes sweep-bar{
