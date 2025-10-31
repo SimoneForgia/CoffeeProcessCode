@@ -731,8 +731,8 @@ b {
           mask-size: 100% 300%;
   -webkit-mask-repeat: no-repeat;
           mask-repeat: no-repeat;
-  -webkit-mask-position: 0 -120%;
-          mask-position: 0 -120%;
+  -webkit-mask-position: 0 0;
+          mask-position: 0 0;
 
   animation:
     sweep-mask 6.5s cubic-bezier(.9,0,.22,1) forwards,
