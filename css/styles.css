@@ -717,58 +717,39 @@ b {
 
 
 /* ANIMAZIONE LIGHT SWEEP */
-/* === Light Sweep Reveal (solo summary.html) === */
+/* === Light Sweep Reveal (versione semplice, lenta, dall'alto verso il basso) === */
 #revealOverlay{
   position: fixed;
   inset: 0;
-  background: #ffffff;              /* colore “tendina” che copre la pagina */
+  background: #ffffff;      /* pagina tutta bianca all'inizio */
   z-index: 9999;
   pointer-events: none;
-  /* Maschera con “finestra” orizzontale che scorre verso il basso */
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 12%, #000 24%);
-          mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 12%, #000 24%);
-  -webkit-mask-size: 100% 300%;
-          mask-size: 100% 300%;
-  -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-  -webkit-mask-position: 0 0;
-          mask-position: 0 0;
-  animation:
-    sweep-mask 3s cubic-bezier(.2,.6,.15,1) forwards,
-    fade-out   .6s ease-out 2.7s forwards; /* svanisce verso la fine */
+  will-change: transform, opacity;
+  animation: reveal-down 4.5s cubic-bezier(.2,.6,.15,1) forwards; /* ← lentezza qui */
 }
 
-/* Barra luminosa centrale (effetto “laser” + alone) */
+/* Linea luminosa al bordo inferiore dell’overlay */
 #revealOverlay .light{
   position: absolute;
   left: 0;
-  top: 0;
+  bottom: 0;               /* è sul bordo che scorre verso il basso */
   width: 100%;
-  height: 2px; /* spessore linea */
+  height: 3px;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
   box-shadow:
     0 0 24px 6px rgba(255,255,255,.65),
     0 0 80px 24px rgba(255,255,255,.35);
   will-change: transform, opacity;
-  animation: sweep-bar 3s cubic-bezier(.2,.6,.15,1) forwards;
 }
 
-@keyframes sweep-mask{
-  to{
-    -webkit-mask-position: 0 100%;
-            mask-position: 0 100%;
-  }
-}
-@keyframes sweep-bar{
-  to{ transform: translateY(100vh); } /* scende fino al bordo inferiore del viewport */
-}
-@keyframes fade-out{
-  to{ opacity: 0; }
+/* L’overlay scende e “libera” la pagina dall’alto verso il basso */
+@keyframes reveal-down{
+  from { transform: translateY(0); }
+  to   { transform: translateY(100%); } /* va sotto il viewport e sparisce */
 }
 
-/* Accessibilità: niente animazione se l’utente la riduce */
+/* Accessibilità */
 @media (prefers-reduced-motion: reduce){
   #revealOverlay{ animation: none; opacity: 0; }
-  #revealOverlay .light{ animation: none; }
 }
 /* FINE ANIMAZIONE LIGHT SWEEP */
