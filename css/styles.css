@@ -717,35 +717,61 @@ b {
 
 
 /* ANIMAZIONE LIGHT SWEEP */
-/* === Light Sweep Reveal (versione semplice, lenta, dall'alto verso il basso) === */
+/* === Light Sweep Reveal — band morbida + avvio lento === */
 #revealOverlay{
   position: fixed;
   inset: 0;
-  background: #ffffff;      /* pagina tutta bianca all'inizio */
+  background: #ffffff;    /* pagina tutta bianca all'inizio */
   z-index: 9999;
   pointer-events: none;
   will-change: transform, opacity;
-  animation: reveal-down 4.5s cubic-bezier(.2,.6,.15,1) forwards; /* ← lentezza qui */
+  /* 5s e curva con avvio lento (ease-in-ish), poi accelera e ammorbidisce sul finale */
+  animation: reveal-down 5s cubic-bezier(.22,.0,.15,1) forwards;
 }
 
-/* Linea luminosa al bordo inferiore dell’overlay */
+/* Banda luminosa con alone morbido */
 #revealOverlay .light{
   position: absolute;
   left: 0;
-  bottom: 0;               /* è sul bordo che scorre verso il basso */
+  bottom: 0;             /* la banda sta sul bordo inferiore dell'overlay che scende */
   width: 100%;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+  height: 120px;         /* spessore banda (era 2–3px, ora “soft beam”) */
+  /* gradiente verticale: trasparente → bianco → trasparente */
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.85) 40%,
+    rgba(255,255,255,1) 50%,
+    rgba(255,255,255,0.85) 60%,
+    rgba(255,255,255,0) 100%
+  );
+  /* alone morbido attorno alla banda (solo ombre, niente blur filter costoso) */
   box-shadow:
-    0 0 24px 6px rgba(255,255,255,.65),
-    0 0 80px 24px rgba(255,255,255,.35);
+    0 0 40px 12px rgba(255,255,255,.55),
+    0 0 120px 36px rgba(255,255,255,.35),
+    0 0 240px 70px rgba(255,255,255,.2);
   will-change: transform, opacity;
 }
 
-/* L’overlay scende e “libera” la pagina dall’alto verso il basso */
+/* alone extra molto ampio (anello esterno) */
+#revealOverlay .light::after{
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:-80px;
+  height: 220px; /* alone largo e soffice */
+  background: radial-gradient(
+    120% 80% at 50% 0%,
+    rgba(255,255,255,.25) 0%,
+    rgba(255,255,255,.10) 40%,
+    rgba(255,255,255,0) 80%
+  );
+  pointer-events:none;
+}
+
+/* L’overlay scende e libera la pagina dall’alto verso il basso */
 @keyframes reveal-down{
   from { transform: translateY(0); }
-  to   { transform: translateY(100%); } /* va sotto il viewport e sparisce */
+  to   { transform: translateY(100%); }
 }
 
 /* Accessibilità */
