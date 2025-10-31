@@ -743,8 +743,8 @@ b {
   -webkit-mask-repeat: no-repeat;
           mask-repeat: no-repeat;
   /* Parto con la finestra ben sopra al viewport: tutto bianco all’inizio */
-  -webkit-mask-position: 0 -120%;
-          mask-position: 0 -120%;
+  -webkit-mask-position: 0 0;
+          mask-position: 0 0;
 
 
   animation:
