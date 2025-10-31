@@ -717,101 +717,58 @@ b {
 
 
 /* ANIMAZIONE LIGHT SWEEP */
-/* === Light Sweep: singola banda, top→bottom, avvio molto lento === */
+/* === Light Sweep Reveal (solo summary.html) === */
 #revealOverlay{
   position: fixed;
   inset: 0;
-  background: #fff;                 /* pagina tutta bianca all’inizio */
+  background: #ffffff;              /* colore “tendina” che copre la pagina */
   z-index: 9999;
   pointer-events: none;
-  overflow: visible;
-
-  /* FINESTRA UNICA: sopra e sotto opaco (#000), al centro trasparente  (nessun pattern) */
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    #000 0%,
-    #000 35%,
-    transparent 50%,
-    #000 65%,
-    #000 100%
-  );
-          mask-image: linear-gradient(
-    to bottom,
-    #000 0%,
-    #000 35%,
-    transparent 50%,
-    #000 65%,
-    #000 100%
-  );
+  /* Maschera con “finestra” orizzontale che scorre verso il basso */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 12%, #000 24%);
+          mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 12%, #000 24%);
+  -webkit-mask-size: 100% 300%;
+          mask-size: 100% 300%;
   -webkit-mask-repeat: no-repeat;
           mask-repeat: no-repeat;
-
-  /* la “pista” è il doppio del viewport: partiamo con la finestra tutta sopra e finiamo tutta sotto */
-  -webkit-mask-size: 100% 200%;
-          mask-size: 100% 200%;
-
-  /* PARTENZA: la finestra (zona trasparente) sta SOPRA al viewport → tutto opaco/bianco */
-  -webkit-mask-position: 0 -100%;
-          mask-position: 0 -100%;
-
-  /* Avvio MOLTO lento → accelerazione → finale morbido (7s) */
+  -webkit-mask-position: 0 0;
+          mask-position: 0 0;
   animation:
-    sweepMask 7s cubic-bezier(.95,0,.2,1) forwards,
-    fadeOverlay .3s ease-out 6.7s forwards;  /* dissolve residuo a fine corsa */
+    sweep-mask 1.2s cubic-bezier(.2,.6,.15,1) forwards,
+    fade-out   .25s ease-out 1.05s forwards; /* svanisce verso la fine */
 }
 
-/* Barra luminosa morbida, più alta al centro, senza bordo netto */
-#revealOverlay::after{
-  content:"";
-  position:absolute;
-  left:-10%;
-  right:-10%;
-  top:-100vh;                /* allineata con la finestra della mask (parte da sopra) */
-  height: 38vh;              /* spessore fascia (morbida) */
-  pointer-events:none;
-
-  /* doppio radiale: core abbagliante + alone largo */
-  background:
-    radial-gradient(28% 130% at 50% 50%,
-      rgba(255,255,255,1) 0%,
-      rgba(255,255,255,.96) 35%,
-      rgba(255,255,255,0) 78%)
-    ,
-    radial-gradient(90% 180% at 50% 50%,
-      rgba(255,255,255,.60) 0%,
-      rgba(255,255,255,.28) 48%,
-      rgba(255,255,255,0) 100%);
-
-  /* profilo più alto al centro (assottiglia i bordi) */
-  -webkit-mask-image: radial-gradient(68% 120% at 50% 50%, #000 62%, transparent 100%);
-          mask-image: radial-gradient(68% 120% at 50% 50%, #000 62%, transparent 100%);
-
-  /* segue la stessa corsa della mask (una sola discesa) */
-  will-change: transform;
-  animation: sweepBar 7s cubic-bezier(.95,0,.2,1) forwards;
+/* Barra luminosa centrale (effetto “laser” + alone) */
+#revealOverlay .light{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 2px; /* spessore linea */
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+  box-shadow:
+    0 0 24px 6px rgba(255,255,255,.65),
+    0 0 80px 24px rgba(255,255,255,.35);
+  will-change: transform, opacity;
+  animation: sweep-bar 1.2s cubic-bezier(.2,.6,.15,1) forwards;
 }
 
-/* La finestra trasparente scende UNA volta: -100% → +100% (dall’alto al basso) */
-@keyframes sweepMask{
+@keyframes sweep-mask{
   to{
     -webkit-mask-position: 0 100%;
             mask-position: 0 100%;
   }
 }
-
-/* La barra luminosa scende in sincrono lungo il viewport */
-@keyframes sweepBar{
-  to{
-    transform: translateY(200vh);   /* entra dall’alto ed esce ben oltre il fondo */
-  }
+@keyframes sweep-bar{
+  to{ transform: translateY(100vh); } /* scende fino al bordo inferiore del viewport */
+}
+@keyframes fade-out{
+  to{ opacity: 0; }
 }
 
-/* Dissolvenza finale per sicurezza */
-@keyframes fadeOverlay{ to{ opacity: 0; } }
-
-/* Riduci animazioni se richiesto dal sistema */
+/* Accessibilità: niente animazione se l’utente la riduce */
 @media (prefers-reduced-motion: reduce){
   #revealOverlay{ animation: none; opacity: 0; }
-  #revealOverlay::after{ animation: none; }
+  #revealOverlay .light{ animation: none; }
 }
 /* FINE ANIMAZIONE LIGHT SWEEP */
