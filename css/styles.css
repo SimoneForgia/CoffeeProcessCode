@@ -729,10 +729,8 @@ b {
   -webkit-mask-image: linear-gradient(
     to bottom,
     #000 0%,
-    #000 36%,
-    rgba(0,0,0,0) 50%, /* ← finestra */
-    #000 64%,
-    #000 100%
+    #000 10%,
+    rgba(0,0,0,0) 100%, /* ← finestra */
   );
  mask-image: linear-gradient(
     to bottom,
