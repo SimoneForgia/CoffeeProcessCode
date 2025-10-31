@@ -731,11 +731,12 @@ b {
           mask-size: 100% 300%;
   -webkit-mask-repeat: no-repeat;
           mask-repeat: no-repeat;
-  -webkit-mask-position: 0 0;
-          mask-position: 0 0;
+  -webkit-mask-position: 0 -120%;
+          mask-position: 0 -120%;
+
   animation:
-    sweep-mask 1.2s cubic-bezier(.2,.6,.15,1) forwards,
-    fade-out   .25s ease-out 1.05s forwards; /* svanisce verso la fine */
+    sweep-mask 6.5s cubic-bezier(.9,0,.22,1) forwards,
+    fade-out    .6s  ease-out 6.2s forwards; /* svanisce solo a fine sweep */
 }
 
 /* Barra luminosa centrale (effetto “laser” + alone) */
